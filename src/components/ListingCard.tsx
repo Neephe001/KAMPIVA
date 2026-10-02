@@ -23,7 +23,7 @@ export function ListingCard({ listing, wide = false, className = '' }: { listing
         className="w-full text-left flex gap-3 rounded-xl bg-white border border-line p-2.5 transition hover:border-ink-400/40 hover:shadow-sm active:scale-[0.995]"
       >
         <div
-          className="w-[92px] h-[92px] rounded-lg bg-soft bg-cover bg-center shrink-0"
+          className="w-23 h-23 rounded-lg bg-soft bg-cover bg-center shrink-0"
           style={{ backgroundImage: `url(${listing.image})` }}
         />
         <div className="min-w-0 flex-1 py-0.5">
@@ -45,10 +45,10 @@ export function ListingCard({ listing, wide = false, className = '' }: { listing
   return (
     <button
       onClick={() => push({ name: 'listing', id: listing.id })}
-      className={`w-[172px] shrink-0 text-left rounded-xl bg-white border border-line overflow-hidden transition hover:border-ink-400/40 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] ${className}`}
+      className={`w-43 shrink-0 text-left rounded-xl bg-white border border-line overflow-hidden transition hover:border-ink-400/40 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] ${className}`}
     >
       <div
-        className="h-28 md:h-auto md:aspect-[4/3] bg-soft bg-cover bg-center relative"
+        className="h-28 md:h-auto md:aspect-4/3 bg-soft bg-cover bg-center relative"
         style={{ backgroundImage: `url(${listing.image})` }}
       >
         {listing.promoted && (
@@ -69,7 +69,7 @@ export function ListingCard({ listing, wide = false, className = '' }: { listing
         </span>
       </div>
       <div className="p-2.5">
-        <p className="font-semibold text-[13.5px] text-ink leading-snug line-clamp-2 min-h-[38px]">
+        <p className="font-semibold text-[13.5px] text-ink leading-snug line-clamp-2 min-h-9.5">
           {listing.title}
         </p>
         <p className="font-display font-bold text-[15px] text-ink mt-1">{priceText(listing)}</p>

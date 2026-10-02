@@ -6,7 +6,7 @@ import { FAQ, JoinBand } from './Pages'
 function Hero({ eyebrow, title, body, children }: { eyebrow: string; title: string; body: string; children?: ReactNode }) {
   return (
     <section className="bg-paper border-b border-line">
-      <div className="mx-auto max-w-[1200px] px-6 lg:px-10 pt-14 pb-14 lg:pt-20 lg:pb-16 animate-rise">
+      <div className="mx-auto max-w-300 px-6 lg:px-10 pt-14 pb-14 lg:pt-20 lg:pb-16 animate-rise">
         <Eyebrow>{eyebrow}</Eyebrow>
         <h1 className="mt-5 max-w-3xl text-[38px] sm:text-[52px] leading-[1.05] font-semibold tracking-[-0.03em]">{title}</h1>
         <p className="mt-5 max-w-2xl text-[18px] leading-relaxed text-ink-700">{body}</p>
@@ -20,7 +20,7 @@ function Doc({ eyebrow, title, updated, sections }: { eyebrow: string; title: st
   return (
     <main>
       <Hero eyebrow={eyebrow} title={title} body={`Last updated ${updated}.`} />
-      <div className="mx-auto max-w-[1200px] px-6 lg:px-10 py-16 grid lg:grid-cols-[240px_1fr] gap-12">
+      <div className="mx-auto max-w-300 px-6 lg:px-10 py-16 grid lg:grid-cols-[240px_1fr] gap-12">
         <nav className="hidden lg:block sticky top-28 self-start text-[14.5px]">
           <ul className="space-y-3 border-l border-line">
             {sections.map(([h], i) => (
@@ -80,10 +80,10 @@ export function Safety() {
   return (
     <main>
       <Hero eyebrow="Safety" title="Look out for each other." body="Verification keeps strangers out. These habits keep your deals safe." />
-      <section className="mx-auto max-w-[1200px] px-6 lg:px-10 py-16 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section className="mx-auto max-w-300 px-6 lg:px-10 py-16 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tips.map(([I, t, d], i) => (
           <Reveal key={t} delay={i * 50}>
-            <div className="h-full rounded-[24px] border border-line bg-paper p-8">
+            <div className="h-full rounded-3xl border border-line bg-paper p-8">
               <I className="text-olive-700" size={26} />
               <h3 className="mt-5 text-[20px] font-semibold">{t}</h3>
               <p className="mt-2 text-ink-700 leading-relaxed">{d}</p>
@@ -92,7 +92,7 @@ export function Safety() {
         ))}
       </section>
       <section className="border-t border-line bg-paper">
-        <div className="mx-auto max-w-[1200px] px-6 lg:px-10 py-14 flex flex-wrap items-center justify-between gap-6">
+        <div className="mx-auto max-w-300 px-6 lg:px-10 py-14 flex flex-wrap items-center justify-between gap-6">
           <div className="max-w-xl">
             <h2 className="text-[26px] font-semibold tracking-[-0.01em]">Something felt wrong?</h2>
             <p className="mt-2 text-ink-700">Report it in the app or email safety@kampiva.com. Our team responds within 24 hours.</p>
@@ -110,7 +110,7 @@ export function Help() {
   return (
     <main>
       <Hero eyebrow="Help" title="How can we help?" body="Answers to the questions we hear most. Still stuck? Write to help@kampiva.com." />
-      <section className="mx-auto max-w-[1200px] px-6 lg:px-10 py-16 grid lg:grid-cols-[1fr_1.5fr] gap-12">
+      <section className="mx-auto max-w-300 px-6 lg:px-10 py-16 grid lg:grid-cols-[1fr_1.5fr] gap-12">
         <div>
           <h2 className="text-[28px] font-semibold tracking-[-0.02em]">Common questions</h2>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -143,7 +143,7 @@ export function Partners() {
   return (
     <main>
       <Hero eyebrow="Campus partners" title="Bring Kampiva to your campus." body="We work with universities, student unions and campus businesses to make everyday campus life safer and simpler." />
-      <section className="mx-auto max-w-[1200px] px-6 lg:px-10 py-16 grid lg:grid-cols-2 gap-14">
+      <section className="mx-auto max-w-300 px-6 lg:px-10 py-16 grid lg:grid-cols-2 gap-14">
         <div className="space-y-8">
           {[
             [Building2, 'Universities', 'Give students a trusted place to trade, find rooms and share rides, with verified members only.'],
@@ -159,7 +159,7 @@ export function Partners() {
             )
           })}
         </div>
-        <div className="rounded-[24px] border border-line bg-paper p-8">
+        <div className="rounded-3xl border border-line bg-paper p-8">
           {sent ? (
             <div className="py-10 text-center"><h2 className="text-[26px] font-semibold">Thank you</h2><p className="mt-2 text-ink-700">We will reach out within 3 working days.</p></div>
           ) : (
@@ -190,7 +190,7 @@ export function Careers() {
   return (
     <main>
       <Hero eyebrow="Careers" title="Build the campus platform students deserve." body="We are a small team in Ilorin making campus life safer, cheaper and easier across Nigeria." />
-      <section className="mx-auto max-w-[1200px] px-6 lg:px-10 py-16">
+      <section className="mx-auto max-w-300 px-6 lg:px-10 py-16">
         <h2 className="text-[28px] font-semibold tracking-[-0.02em]">Open roles</h2>
         <ul className="mt-8 border-t border-line">
           {ROLES.map(([t, team, where]) => (

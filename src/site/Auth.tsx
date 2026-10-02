@@ -34,10 +34,10 @@ function Slides({ go }: { go: Go }) {
   return (
     <aside className="relative hidden lg:flex flex-col overflow-hidden rounded-[28px] bg-olive-950 text-white">
       {SLIDES.map((x, n) => (
-        <Img key={x.key} src={img(x.photo, 1100, 1400)} alt={n === i ? x.alt : ''} className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1400ms] ease-out ${n === i ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`} />
+        <Img key={x.key} src={img(x.photo, 1100, 1400)} alt={n === i ? x.alt : ''} className={`absolute inset-0 h-full w-full object-cover transition-all duration-1400 ease-out ${n === i ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`} />
       ))}
-      <div className="absolute inset-0 bg-gradient-to-b from-olive-950/60 via-olive-950/10 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-olive-950 via-olive-950/70 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-b from-olive-950/60 via-olive-950/10 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-3/4 bg-linear-to-t from-olive-950 via-olive-950/70 to-transparent" />
       <div className="relative flex flex-1 flex-col p-10 xl:p-12">
         <div className="flex justify-start">
           <button type="button" onClick={() => go('home')} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[13.5px] font-medium text-white backdrop-blur-md transition hover:bg-white hover:text-olive-950">
@@ -53,7 +53,7 @@ function Slides({ go }: { go: Go }) {
           <div className="mt-8 flex gap-1.5">
             {SLIDES.map((x, n) => (
               <button key={x.key} type="button" onClick={() => setI(n)} aria-label={`Show Kampiva ${x.name}`} aria-current={n === i} className="flex-1 py-2">
-                <span className="block h-[3px] overflow-hidden rounded-full bg-white/25">
+                <span className="block h-0.75 overflow-hidden rounded-full bg-white/25">
                   {n < i && <span className="block h-full w-full bg-lime-400" />}
                   {n === i && <span key={i} className="block h-full bg-lime-400" style={{ animation: 'kv-bar 5200ms linear both' }} />}
                 </span>
@@ -72,13 +72,13 @@ function AuthLayout({ go, children }: { go: Go; children: ReactNode }) {
       <Slides go={go} />
       <main className="flex flex-col px-3 sm:px-10 py-3">
         <div className="flex items-center justify-between gap-4">
-          <button onClick={() => go('home')} aria-label="Kampiva home" className="rounded-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-lime-400/50"><KampivaLogo className="h-[40px]" /></button>
+          <button onClick={() => go('home')} aria-label="Kampiva home" className="rounded-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-lime-400/50"><KampivaLogo className="h-10" /></button>
           <button onClick={() => go('home')} className="inline-flex min-h-10 items-center gap-2 rounded-full px-3 text-[14px] font-medium text-ink-500 transition hover:bg-sand hover:text-ink lg:hidden">
             <ArrowLeft size={16} /> Back to site
           </button>
         </div>
         <div className="flex-1 flex items-center">
-          <div className="w-full max-w-[440px] mx-auto py-8 animate-rise">{children}</div>
+          <div className="w-full max-w-110 mx-auto py-8 animate-rise">{children}</div>
         </div>
       </main>
     </div>

@@ -69,7 +69,7 @@ export function Explorer({ p, initialQuery = '' }: { p: Pillar; initialQuery?: s
           ))}
         </div>
         <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0">
-          <label className="relative sm:w-[300px]">
+          <label className="relative sm:w-75">
             <span className="sr-only">Search {p.name}</span>
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-500" />
             <input
@@ -129,7 +129,7 @@ export function Explorer({ p, initialQuery = '' }: { p: Pillar; initialQuery?: s
 /** Closing card in the grid: nudges visitors to join for the full catalogue. */
 function MoreCard({ name, onOpen }: { name: string; onOpen: () => void }) {
   return (
-    <button onClick={onOpen} className="group relative flex h-full min-h-[340px] w-full flex-col overflow-hidden rounded-[22px] bg-olive-950 p-7 text-left text-white transition duration-300 hover:-translate-y-1 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-lime-400/60">
+    <button onClick={onOpen} className="group relative flex h-full min-h-85 w-full flex-col overflow-hidden rounded-[22px] bg-olive-950 p-7 text-left text-white transition duration-300 hover:-translate-y-1 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-lime-400/60">
       <KampivaMark className="pointer-events-none absolute -right-8 -bottom-8 h-48 opacity-[0.08] transition duration-700 group-hover:rotate-12" />
       <h3 className="font-display text-[24px] font-semibold leading-tight">There's a lot more where this came from.</h3>
       <p className="mt-3 text-[14.5px] text-white/75">{session.user() ? `Open the app to browse every ${name} listing on your campus.` : `Sign up free to unlock every ${name} listing on your campus, plus new posts the moment they go live.`}</p>
@@ -144,7 +144,7 @@ function Card({ l, onOpen }: { l: Listing; onOpen: () => void }) {
   const r = ratingFor(l)
   return (
     <article className="group flex h-full flex-col rounded-[22px] border border-line bg-white p-2 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-olive-950/[0.07]">
-      <div className="relative aspect-[16/10] overflow-hidden rounded-[16px] bg-sand">
+      <div className="relative aspect-16/10 overflow-hidden rounded-2xl bg-sand">
         <Img src={img(l.photo, 640, 400)} className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]" />
         {l.badge && <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-[12.5px] font-semibold text-olive-800">{l.badge}</span>}
       </div>
@@ -178,8 +178,8 @@ export function Modal({ onClose, label, children }: { onClose: () => void; label
     return () => { document.removeEventListener('keydown', on); document.body.style.overflow = ''; prev?.focus() }
   }, [onClose])
   return (
-    <div className="fixed inset-0 z-[60] grid place-items-end sm:place-items-center bg-olive-950/50 sm:p-6 animate-fade" onClick={onClose}>
-      <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-label={label} onClick={(e) => e.stopPropagation()} className="relative w-full sm:max-w-[520px] max-h-[92dvh] overflow-auto rounded-t-[24px] sm:rounded-[24px] bg-white outline-none animate-rise">
+    <div className="fixed inset-0 z-60 grid place-items-end sm:place-items-center bg-olive-950/50 sm:p-6 animate-fade" onClick={onClose}>
+      <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-label={label} onClick={(e) => e.stopPropagation()} className="relative w-full sm:max-w-130 max-h-[92dvh] overflow-auto rounded-t-3xl sm:rounded-3xl bg-white outline-none animate-rise">
         <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full bg-white text-ink shadow transition hover:bg-sand active:scale-90"><X size={20} /></button>
         {children}
       </div>
@@ -191,7 +191,7 @@ function Detail({ p, l, onClose, onAct }: { p: Pillar; l: Listing; onClose: () =
   const r = ratingFor(l)
   return (
     <Modal onClose={onClose} label={l.title}>
-      <div className="aspect-[16/10] bg-sand"><Img src={img(l.photo, 1040, 650)} alt={l.title} className="h-full w-full object-cover" /></div>
+      <div className="aspect-16/10 bg-sand"><Img src={img(l.photo, 1040, 650)} alt={l.title} className="h-full w-full object-cover" /></div>
       <div className="p-6 sm:p-8">
         <span className="text-[13px] font-semibold text-olive-700">Kampiva {p.name} · {l.cat}</span>
         <h3 className="mt-1 text-[24px] font-semibold leading-snug">{l.title}</h3>

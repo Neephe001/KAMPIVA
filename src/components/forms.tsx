@@ -128,7 +128,7 @@ export function TextField({
         aria-invalid={!!error}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`${inputClass} ${error ? '!border-alert' : ''}`}
+        className={`${inputClass} ${error ? 'border-alert!' : ''}`}
       />
       {error && <span className="mt-1 block text-[12px] text-alert" role="alert">{error}</span>}
     </Field>

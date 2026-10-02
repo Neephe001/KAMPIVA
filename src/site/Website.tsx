@@ -44,8 +44,8 @@ function Header({ go }: { go: Go }) {
   const logout = () => { session.signOut(); setOpen(false); navigate('/') }
   return (
     <header className={`sticky top-0 z-50 bg-white/90 backdrop-blur transition-shadow duration-300 ${scrolled ? 'shadow-[0_1px_0_var(--color-line),0_8px_24px_-12px_rgb(27_33_9/0.15)]' : 'shadow-[0_1px_0_var(--color-line)]'}`}>
-      <div className="relative mx-auto max-w-[1200px] px-6 lg:px-10 h-[68px] lg:h-[84px] flex items-center gap-8">
-        <button onClick={() => nav('home')} aria-label="Kampiva home" className="rounded-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-lime-400/50"><KampivaLogo className="h-[38px] lg:h-[42px]" /></button>
+      <div className="relative mx-auto max-w-300 px-6 lg:px-10 h-17 lg:h-21 flex items-center gap-8">
+        <button onClick={() => nav('home')} aria-label="Kampiva home" className="rounded-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-lime-400/50"><KampivaLogo className="h-9.5 lg:h-10.5" /></button>
         <nav aria-label="Main" className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 text-[14.5px] font-medium">
           {NAV.map((n) => <NavLink key={n.to} to={`/${n.to}`} className={navCls}>{n.label}</NavLink>)}
         </nav>
@@ -98,9 +98,9 @@ function Footer({ go }: { go: Go }) {
   ]
   return (
     <footer className="bg-white border-t border-line">
-      <div className="mx-auto max-w-[1200px] px-6 lg:px-10 py-16 grid md:grid-cols-[1.5fr_repeat(3,1fr)] gap-10">
+      <div className="mx-auto max-w-300 px-6 lg:px-10 py-16 grid md:grid-cols-[1.5fr_repeat(3,1fr)] gap-10">
         <div>
-          <KampivaLogo className="h-[54px]" />
+          <KampivaLogo className="h-13.5" />
           <p className="mt-4 max-w-xs text-[14px] text-ink-500 leading-relaxed">Buy, borrow, find a room and share rides with verified students. Made in Ilorin.</p>
         </div>
         {cols.map((c) => (
@@ -113,7 +113,7 @@ function Footer({ go }: { go: Go }) {
         ))}
       </div>
       <div className="border-t border-line">
-        <div className="mx-auto max-w-[1200px] px-6 lg:px-10 py-6 flex flex-wrap justify-between gap-3 text-[13px] text-ink-500">
+        <div className="mx-auto max-w-300 px-6 lg:px-10 py-6 flex flex-wrap justify-between gap-3 text-[13px] text-ink-500">
           <span>© 2026 Kampiva Technologies Ltd.</span>
           <span>Built for Nigerian campuses</span>
         </div>
@@ -161,14 +161,9 @@ const router = createBrowserRouter([
       { path: '*', Component: NotFound },
     ],
   },
-  {
-    Component: AuthShell,
-    children: [
-      { path: 'login', lazy: async () => ({ Component: (await import('./Auth')).LoginRoute }) },
-      { path: 'signup', lazy: async () => ({ Component: (await import('./Auth')).SignupRoute }) },
-      { path: 'forgot', lazy: async () => ({ Component: (await import('./Auth')).ForgotRoute }) },
-    ],
-  },
+  { path: 'login', lazy: async () => ({ Component: (await import('./Auth')).LoginRoute }) },
+  { path: 'signup', lazy: async () => ({ Component: (await import('./Auth')).SignupRoute }) },
+  { path: 'forgot', lazy: async () => ({ Component: (await import('./Auth')).ForgotRoute }) },
   { path: '/app', lazy: async () => ({ Component: (await import('./Platform')).Platform }), HydrateFallback: AppLoading },
 ])
 

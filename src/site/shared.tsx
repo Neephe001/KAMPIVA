@@ -9,7 +9,7 @@ const imgWord = `${assetPathPrefix}/57a4d.svg`
 /** Primary horizontal logo, composed from the two vectorised Figma layers. */
 export function KampivaLogo({ className = 'h-9' }: { className?: string }) {
   return (
-    <span className={`relative inline-block aspect-[1962/872] ${className}`} role="img" aria-label="Kampiva">
+    <span className={`relative inline-block aspect-1962/872 ${className}`} role="img" aria-label="Kampiva">
       <img alt="" src={imgMark} className="absolute block max-w-none" style={{ left: '3.93%', top: '2.34%', width: '36.53%', height: '95.28%' }} />
       <img alt="" src={imgWord} className="absolute block max-w-none" style={{ left: '36.78%', top: '36.26%', width: '60.7%', height: '31.44%' }} />
     </span>
@@ -29,7 +29,7 @@ export function MarkRipple({ tone = 'dark' }: { tone?: 'dark' | 'light' }) {
       {layers.map((h, i) => (
         <span
           key={h}
-          className={`absolute right-0 top-1/2 aspect-[716.7/830.8] translate-x-[calc(62%+24px)] sm:translate-x-[calc(38%+24px)] -translate-y-1/2 transition-transform duration-[1200ms] ease-out group-hover/cta:rotate-[-6deg] ${tone === 'dark' ? 'bg-lime-400' : 'bg-olive-700'}`}
+          className={`absolute right-0 top-1/2 aspect-[716.7/830.8] translate-x-[calc(62%+24px)] sm:translate-x-[calc(38%+24px)] -translate-y-1/2 transition-transform duration-1200 ease-out group-hover/cta:-rotate-6 ${tone === 'dark' ? 'bg-lime-400' : 'bg-olive-700'}`}
           style={{ height: `${h}%`, opacity: fade[i], transitionDelay: `${i * 60}ms`, mask: `url(${imgMark}) center / contain no-repeat`, WebkitMask: `url(${imgMark}) center / contain no-repeat` }}
         />
       ))}

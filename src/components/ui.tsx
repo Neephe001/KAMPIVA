@@ -189,9 +189,9 @@ export function Sheet({
 }) {
   if (!open) return null
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-end md:items-center justify-center" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-80 flex items-end md:items-center justify-center" role="dialog" aria-modal="true">
       <button aria-label="Close" onClick={onClose} className="absolute inset-0 bg-olive-950/45 backdrop-blur-[2px] animate-fade" />
-      <div className={`relative w-full ${wide ? 'md:max-w-[620px]' : 'md:max-w-[460px]'} max-h-[88dvh] flex flex-col rounded-t-3xl md:rounded-3xl bg-white shadow-2xl animate-rise`}>
+      <div className={`relative w-full ${wide ? 'md:max-w-155' : 'md:max-w-115'} max-h-[88dvh] flex flex-col rounded-t-3xl md:rounded-3xl bg-white shadow-2xl animate-rise`}>
         <div className="flex items-center gap-3 px-5 pt-5 pb-3">
           <span className="absolute left-1/2 top-2 h-1 w-10 -translate-x-1/2 rounded-full bg-line md:hidden" />
           {title && <h3 className="font-display font-semibold text-[18px] text-ink flex-1">{title}</h3>}
@@ -211,7 +211,7 @@ export function Sheet({
 export function Toast({ message }: { message: string | null }) {
   if (!message) return null
   return createPortal(
-    <div className="fixed bottom-24 md:bottom-8 left-1/2 z-[90] -translate-x-1/2 rounded-full bg-olive-950 px-4 py-2.5 text-[13.5px] font-medium text-white shadow-lg animate-rise">
+    <div className="fixed bottom-24 md:bottom-8 left-1/2 z-90 -translate-x-1/2 rounded-full bg-olive-950 px-4 py-2.5 text-[13.5px] font-medium text-white shadow-lg animate-rise">
       {message}
     </div>,
     document.body,
@@ -230,7 +230,7 @@ export function useToast() {
 export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
     <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={() => onChange(!on)} className={`relative h-6 w-11 shrink-0 rounded-full transition ${on ? 'bg-olive-700' : 'bg-line'}`}>
-      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? 'left-[22px]' : 'left-0.5'}`} />
+      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? 'left-5.5' : 'left-0.5'}`} />
     </button>
   )
 }

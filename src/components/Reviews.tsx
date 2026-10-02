@@ -59,7 +59,7 @@ export function WriteReview({ open, onClose, onDone, defaultPillar }: { open: bo
           <StarPicker value={rating} onChange={setRating} />
         </div>
         <Field label="Your experience" hint={`${body.trim().length < 10 ? 'At least 10 characters. ' : ''}Be specific and fair. Reviews can't be edited once posted.`}>
-          <textarea className={`${inputClass} min-h-[110px] resize-none`} value={body} onChange={(e) => setBody(e.target.value)} placeholder="What went well? Was anything different from the listing?" maxLength={400} />
+          <textarea className={`${inputClass} min-h-27.5 resize-none`} value={body} onChange={(e) => setBody(e.target.value)} placeholder="What went well? Was anything different from the listing?" maxLength={400} />
         </Field>
       </div>
     </Sheet>

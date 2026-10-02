@@ -15,7 +15,7 @@ export function ReviewsPage() {
   return (
     <main>
       <section className="bg-paper border-b border-line">
-        <div className="mx-auto max-w-[1200px] px-6 lg:px-10 pt-14 pb-14 lg:pt-20 lg:pb-16">
+        <div className="mx-auto max-w-300 px-6 lg:px-10 pt-14 pb-14 lg:pt-20 lg:pb-16">
           <div className="max-w-2xl animate-rise">
             <span className="inline-flex items-center gap-2 rounded-full bg-olive-100 px-3.5 py-1.5 text-[14px] font-semibold text-olive-800"><Star size={15} className="fill-olive-800" /> Ratings and reviews</span>
             <h1 className="mt-6 text-[38px] sm:text-[52px] leading-[1.05] font-semibold tracking-[-0.03em]">Real students. Honest ratings.</h1>
@@ -28,12 +28,12 @@ export function ReviewsPage() {
         </div>
       </section>
       <section className="bg-white">
-        <div className="mx-auto max-w-[1200px] px-6 lg:px-10 py-14 lg:py-20">
+        <div className="mx-auto max-w-300 px-6 lg:px-10 py-14 lg:py-20">
           <ReviewsBoard onWrite={flow.write} />
         </div>
       </section>
       <section className="bg-paper border-t border-line">
-        <div className="mx-auto max-w-[1200px] px-6 lg:px-10 py-14">
+        <div className="mx-auto max-w-300 px-6 lg:px-10 py-14">
           <Eyebrow>How ratings work</Eyebrow>
           <div className="mt-6 grid gap-8 md:grid-cols-3">
             {[['Only after a real deal', 'You can review a provider once you have bought, booked or ridden with them.'], ['Providers can reply', 'Sellers, landlords, lab owners and drivers can respond publicly to what you write.'], ['Bad actors drop off', 'Providers with repeated low ratings are reviewed and can be removed.']].map(([t, d]) => (

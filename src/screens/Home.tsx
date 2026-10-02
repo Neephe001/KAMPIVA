@@ -83,7 +83,7 @@ export function Home() {
       <div className="md:grid md:grid-cols-[1.5fr_1fr] md:gap-4 md:px-8 md:mt-5">
       {/* verified banner */}
       <div className="px-4 md:px-0 mt-5 md:mt-0">
-        <div className="h-full rounded-xl md:rounded-2xl bg-gradient-to-br from-brand to-brand-700 p-4 md:p-6 text-white relative overflow-hidden">
+        <div className="h-full rounded-xl md:rounded-2xl bg-linear-to-br from-brand to-brand-700 p-4 md:p-6 text-white relative overflow-hidden">
           <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-white/10" />
           <div className="absolute -right-10 top-10 w-24 h-24 rounded-full bg-white/5" />
           <div className="relative">

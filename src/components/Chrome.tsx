@@ -6,8 +6,8 @@ import { NOTIFICATIONS, THREADS } from '../lib/data'
 /** Scrollable content region sized to sit under the status bar and above the tab bar. */
 export function ScreenScroll({ children, pad = true }: { children: ReactNode; pad?: boolean }) {
   return (
-    <div className="absolute inset-0 bottom-[76px] md:bottom-0 overflow-y-auto no-scrollbar">
-      <div className={`mx-auto w-full max-w-[1120px] md:pt-6 md:pb-12 ${pad ? 'px-4 md:px-8 pb-6' : 'pb-6'}`}>{children}</div>
+    <div className="absolute inset-0 bottom-19 md:bottom-0 overflow-y-auto no-scrollbar">
+      <div className={`mx-auto w-full max-w-280 md:pt-6 md:pb-12 ${pad ? 'px-4 md:px-8 pb-6' : 'pb-6'}`}>{children}</div>
     </div>
   )
 }
@@ -69,7 +69,7 @@ export function BottomNav() {
   const unreadMsgs = THREADS.reduce((n, t) => n + t.unread, 0)
   const unreadNotif = NOTIFICATIONS.filter((n) => n.unread).length
   return (
-    <nav aria-label="Main" className="absolute bottom-0 inset-x-0 z-40 h-[76px] md:hidden bg-white border-t border-line px-2 pt-1.5 flex items-start justify-around">
+    <nav aria-label="Main" className="absolute bottom-0 inset-x-0 z-40 h-19 md:hidden bg-white border-t border-line px-2 pt-1.5 flex items-start justify-around">
       {TABS.map(({ id, label, icon: Icon }) => {
         const active = tab === id
         const badge = id === 'inbox' ? unreadMsgs : id === 'activity' ? unreadNotif : 0
@@ -83,7 +83,7 @@ export function BottomNav() {
             <div className="relative">
               <Icon size={23} strokeWidth={active ? 2.4 : 2} color={active ? '#556522' : '#707465'} />
               {badge > 0 && (
-                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-alert text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1.5 -right-2 min-w-4 h-4 px-1 rounded-full bg-alert text-white text-[10px] font-bold flex items-center justify-center">
                   {badge}
                 </span>
               )}
