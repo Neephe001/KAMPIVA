@@ -1,0 +1,11 @@
+{
+  "title": "Uinspire Kampiva",
+  "description": "Kampiva is a mobile application designed for users seeking a seamless shopping experience, offering a curated selection of products and personalized recommendations.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Poppins', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Kampiva palette v3 — derived from the Olive + Lime logo */
+  --color-olive-50: #f5f7ec;
+  --color-olive-100: #e8edd2;
+  --color-olive-200: #d1dba6;
+  --color-olive-300: #afc06e;
+  --color-olive-400: #879a3f;
+  --color-olive-500: #6b7f2b;
+  --color-olive-600: #5e7026;
+  --color-olive-700: #556522;
+  --color-olive-800: #434f1c;
+  --color-olive-900: #2f3812;
+  --color-olive-950: #1b2109;
+
+  --color-lime-50: #f8fce8;
+  --color-lime-100: #eef7c7;
+  --color-lime-200: #ddee93;
+  --color-lime-300: #cbe45c;
+  --color-lime-400: #b8da2b;
+  --color-lime-500: #9dbc1e;
+  --color-lime-600: #7c9416;
+  --color-lime-700: #5e7012;
+
+  --color-paper: #fafaf5;
+  --color-sand: #f1f1e8;
+
+  /* legacy aliases, remapped to the new palette */
+  --color-brand: #556522;
+  --color-brand-600: #556522;
+  --color-brand-700: #434f1c;
+  --color-brand-50: #f5f7ec;
+  --color-brand-100: #e8edd2;
+
+  --color-verify: #4f7a12;
+  --color-verify-50: #f8fce8;
+  --color-verify-100: #eef7c7;
+  --color-verify-700: #3e5a0e;
+
+  --color-ink: #1a1d12;
+  --color-ink-700: #3a3e2e;
+  --color-ink-500: #6b6f5e;
+  --color-ink-400: #707465;
+
+  --color-soft: #fafaf5;
+  --color-line: #e3e4d6;
+  --color-field: #878b78; /* 3.5:1 input boundary */
+
+  --color-amber: #9a6300;
+  --color-amber-50: #fdf6e3;
+  --color-alert: #c23b22;
+  --color-alert-50: #fbeeea;
+
+  --color-disabled: #cfd1c2;
+
+  /* pillar accents */
+  --color-market: #556522;
+  --color-research: #3d6b4f;
+  --color-stay: #93602a;
+  --color-move: #2e6b6b;
+
+  --radius-card: 12px;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background: var(--color-paper);
+  }
+  ::selection { background: var(--color-lime-300); color: var(--color-olive-950);
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  /* Hide scrollbars until scrolling (phone-app feel) */
+  .no-scrollbar::-webkit-scrollbar { width: 0; height: 0; }
+  .no-scrollbar { scrollbar-width: none; }
+}
+
+@layer utilities {
+  .font-display { font-family: var(--font-display); }
+  @keyframes kv-rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-rise { animation: kv-rise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes kv-slide {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+  .reveal.is-in { opacity: 1; transform: none; }
+  @keyframes kv-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .animate-float { animation: kv-float 6s ease-in-out infinite; }
+  @keyframes kv-pulse { 0% { box-shadow: 0 0 0 0 rgb(184 218 43 / 0.6); } 100% { box-shadow: 0 0 0 10px rgb(184 218 43 / 0); } }
+  .animate-ping-soft { animation: kv-pulse 1.8s ease-out infinite; }
+  .animate-slide { animation: kv-slide 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes kv-bar { from { width: 0; } to { width: 100%; } }
+  @keyframes kv-fade { from { opacity: 0; } }
+  .animate-fade { animation: kv-fade 0.2s ease-out both; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  .reveal { opacity: 1; transform: none; }
+}
