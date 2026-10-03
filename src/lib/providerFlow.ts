@@ -172,7 +172,7 @@ export function validate(sector: Pillar, step: StepId, d: FlowData): string | nu
 
 const IMG: Record<Pillar, string> = {
   market: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=600&fit=crop&auto=format',
-  research: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?w=800&h=600&fit=crop&auto=format',
+  research: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?w=800&h=600&fit=crop&auto=format',
   stay: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop&auto=format',
   move: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&h=600&fit=crop&auto=format',
 }

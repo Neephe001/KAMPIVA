@@ -36,7 +36,12 @@ export type Pillar = {
 import { LISTINGS, PEOPLE } from '../lib/data'
 import type { Listing as AppListing } from '../lib/types'
 
-export const img = (id: string, w: number, h: number) => `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format&q=80`
+export const img = (id: string, w: number, h: number) => {
+  if (!id) return ''
+  if (id.startsWith('http://') || id.startsWith('https://')) return id
+  const path = id.startsWith('photo-') ? id : `photo-${id}`
+  return `https://images.unsplash.com/${path}?w=${w}&h=${h}&fit=crop&auto=format&q=80`
+}
 export const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`
 
 const displayPrice = (listing: AppListing) => {

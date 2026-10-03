@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Eye, MessageCircle, TrendingUp, Plus, MoreHorizontal, Sparkles, Clock, Check, Trash2, Pause, Play, ArrowRight } from 'lucide-react'
 import { BackHeader, StackScroll } from '../components/Chrome'
 import { Button, Sheet, Toast, useToast } from '../components/ui'
+import { Img } from '../site/shared'
 import { userListings, formatNaira } from '../lib/data'
 import { useNav } from '../lib/nav'
 import { SECTORS } from '../lib/providers'
@@ -89,7 +90,9 @@ export function ProviderDashboard() {
                 const isPaused = paused.includes(l.id)
                 return (
                   <div key={l.id} className="flex gap-3 rounded-xl border border-line p-2.5">
-                    <div className="h-16 w-16 shrink-0 rounded-lg bg-sand bg-cover bg-center" style={{ backgroundImage: `url(${l.image})` }} />
+                    <div className="h-16 w-16 shrink-0 rounded-lg bg-sand overflow-hidden">
+                      <Img src={l.image} alt={l.title} className="w-full h-full object-cover" />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <button onClick={() => !l.draft && push({ name: 'listing', id: l.id })} className="line-clamp-1 text-left text-[13.5px] font-semibold hover:underline">{l.title}</button>

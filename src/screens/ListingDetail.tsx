@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Share2, Heart, MapPin, ChevronRight, Flag, ShieldCheck, Star, Check } from 'lucide-react'
 import { BackHeader, StackScroll } from '../components/Chrome'
 import { Avatar, Button, Field, Sheet, Stars, Toast, VerifiedBadge, inputClass, useToast } from '../components/ui'
+import { Img } from '../site/shared'
 import { getListing, getPerson, formatNaira, PILLARS } from '../lib/data'
 import { useNav } from '../lib/nav'
 import type { Listing } from '../lib/types'
@@ -82,11 +83,9 @@ export function ListingDetail({ id }: { id: string }) {
               }}
             >
               {images.map((src, i) => (
-                <div
-                  key={i}
-                  className="h-64 w-full shrink-0 snap-center bg-soft bg-cover bg-center"
-                  style={{ backgroundImage: `url(${src})` }}
-                />
+                <div key={i} className="h-64 w-full shrink-0 snap-center bg-soft relative overflow-hidden">
+                  <Img src={src} alt={listing.title} className="w-full h-full object-cover" />
+                </div>
               ))}
             </div>
             <span

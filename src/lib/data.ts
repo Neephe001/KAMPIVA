@@ -144,7 +144,7 @@ export const LISTINGS: Listing[] = [
   {
     id: 'r-eq1', pillar: 'research', title: 'UV-Vis Spectrophotometer', category: 'Analytical Instruments',
     priceLabel: 'Free for verified researchers', location: 'Central Lab, Chemistry', sellerId: 'u-chem-lab',
-    image: img('1581093458791-9f3c3900df4b'), postedAgo: 'Updated 3d ago', availability: 'Available, request access',
+    image: img('1579154204601-01588f351e67'), postedAgo: 'Updated 3d ago', availability: 'Available, request access',
     tags: ['Institutional', 'Departmental clearance may apply'],
     description:
       'Double-beam UV-Vis spectrophotometer (190–1100 nm). Available to verified students and researchers with a valid project reference. Sensitive instrument. Departmental clearance required for first use.',
