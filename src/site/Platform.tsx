@@ -147,7 +147,7 @@ function Sidebar() {
       <div className="mt-auto space-y-1 text-[14px] text-ink-500">
         <div className="hidden lg:block mb-4 rounded-2xl bg-olive-950 p-4 text-white">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-lime-400 px-2.5 py-0.5 text-[11px] font-bold text-olive-950"><BadgeCheck size={13} /> KampivaID</span>
-          <p className="mt-3 font-display text-[15px] font-semibold leading-snug">One ID across Market, Research, Stay and Move.</p>
+          <p className="mt-3 font-display text-[15px] font-semibold leading-snug">One ID across U-Market, U-Research, U-Stay and U-Move.</p>
         </div>
         <button onClick={() => navigate('/')} title="Back to site" className={`${item} py-2.5! text-[14px]! hover:bg-olive-50`}><ArrowLeft size={18} /><span className="hidden lg:inline">Back to site</span></button>
         <button onClick={logout} title="Log out" className={`${item} py-2.5! text-[14px]! text-alert hover:bg-alert-50`}><LogOut size={18} /><span className="hidden lg:inline">Log out</span></button>

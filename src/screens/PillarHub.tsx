@@ -3,7 +3,7 @@ import { Search, Info, FlaskConical, KeyRound, CarFront } from 'lucide-react'
 import { BackHeader, StackScroll } from '../components/Chrome'
 import { Chip } from '../components/ui'
 import { ListingCard } from '../components/ListingCard'
-import { listingsByPillar, PILLARS } from '../lib/data'
+import { useListingsByPillar, PILLARS } from '../lib/data'
 import type { Pillar } from '../lib/types'
 
 const HERO: Record<Exclude<Pillar, 'market'>, { icon: typeof FlaskConical; blurb: string; cats: string[] }> = {
@@ -28,7 +28,7 @@ export function PillarHub({ id }: { id: string }) {
   const pillar = PILLARS.find((p) => p.id === id)!
   const meta = HERO[id as Exclude<Pillar, 'market'>]
   const Icon = meta.icon
-  const all = listingsByPillar(pillar.id)
+  const all = useListingsByPillar(pillar.id)
   const [cat, setCat] = useState('All')
   const [q, setQ] = useState('')
 

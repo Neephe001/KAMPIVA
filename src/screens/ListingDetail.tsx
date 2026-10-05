@@ -3,7 +3,7 @@ import { Share2, Heart, MapPin, ChevronRight, Flag, ShieldCheck, Star, Check } f
 import { BackHeader, StackScroll } from '../components/Chrome'
 import { Avatar, Button, Field, Sheet, Stars, Toast, VerifiedBadge, inputClass, useToast } from '../components/ui'
 import { Img } from '../site/shared'
-import { getListing, getPerson, formatNaira, PILLARS } from '../lib/data'
+import { useListing, getPerson, formatNaira, PILLARS } from '../lib/data'
 import { useNav } from '../lib/nav'
 import type { Listing } from '../lib/types'
 import { createOrder } from '../lib/orders'
@@ -36,7 +36,7 @@ export function ListingDetail({ id }: { id: string }) {
   const [reportOpen, setReportOpen] = useState(false)
   const [toast, showToast] = useToast()
   const [activeImg, setActiveImg] = useState(0)
-  const listing = getListing(id)
+  const listing = useListing(id)
   if (!listing) return null
   const seller = getPerson(listing.sellerId)
   const pillar = PILLARS.find((p) => p.id === listing.pillar)!

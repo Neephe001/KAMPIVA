@@ -10,10 +10,10 @@ import { session, useUser } from '../lib/session'
 import { useNavigate } from 'react-router'
 
 const NAV: { label: string; to: Route }[] = [
-  { label: 'Market', to: 'market' },
-  { label: 'Research', to: 'research' },
-  { label: 'Stay', to: 'stay' },
-  { label: 'Move', to: 'move' },
+  { label: 'U-Market', to: 'market' },
+  { label: 'U-Research', to: 'research' },
+  { label: 'U-Stay', to: 'stay' },
+  { label: 'U-Move', to: 'move' },
   { label: 'Reviews', to: 'reviews' },
   { label: 'For providers', to: 'providers' },
 ]
@@ -92,7 +92,7 @@ function Header({ go }: { go: Go }) {
 
 function Footer({ go }: { go: Go }) {
   const cols = [
-    { h: 'Explore', l: [['Market', 'market'], ['Research', 'research'], ['Stay', 'stay'], ['Move', 'move'], ['Reviews', 'reviews']] },
+    { h: 'Explore', l: [['U-Market', 'market'], ['U-Research', 'research'], ['U-Stay', 'stay'], ['U-Move', 'move'], ['Reviews', 'reviews']] },
     { h: 'Company', l: [['About Kampiva', 'about'], ['For providers', 'providers'], ['Campus partners', 'partners'], ['Careers', 'careers']] },
     { h: 'Support', l: [['Help and FAQ', 'help'], ['Safety', 'safety'], ['Terms', 'terms'], ['Privacy', 'privacy']] },
   ]
@@ -179,7 +179,7 @@ function NotFound() {
         <p className="font-display text-[64px] font-semibold leading-none text-olive-700">404</p>
         <h1 className="mt-4 text-[28px] font-semibold">We couldn't find that page.</h1>
         <p className="mt-2 text-ink-500">It may have moved. Head back and pick up from the home page.</p>
-        <div className="mt-8 flex justify-center gap-3"><Btn onClick={() => go('home')}>Go home</Btn><Btn variant="outline" onClick={() => go('market')}>Browse Market</Btn></div>
+        <div className="mt-8 flex justify-center gap-3"><Btn onClick={() => go('home')}>Go home</Btn><Btn variant="outline" onClick={() => go('market')}>Browse U-Market</Btn></div>
       </div>
     </main>
   )

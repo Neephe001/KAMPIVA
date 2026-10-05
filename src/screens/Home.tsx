@@ -4,7 +4,7 @@ import { Avatar, VerifiedBadge, SectionHeader } from '../components/ui'
 import { ListingCard } from '../components/ListingCard'
 import { ScreenScroll } from '../components/Chrome'
 import { useNav } from '../lib/nav'
-import { CURRENT_USER, PILLARS, listingsByPillar, useAllListings } from '../lib/data'
+import { CURRENT_USER, PILLARS, useAllListings } from '../lib/data'
 import type { Pillar } from '../lib/types'
 
 const PILLAR_ICON: Record<Pillar, typeof ShoppingBag> = {
@@ -72,7 +72,7 @@ export function Home() {
                 <Icon size={24} color={p.color} strokeWidth={2} />
                 <span className="text-[11.5px] md:text-left font-semibold" style={{ color: p.color }}>
                   <span className="md:text-[15px] md:font-display">{p.name}</span>
-                  <span className="hidden lg:block text-[12px] font-medium text-ink-500">{listingsByPillar(p.id).length} listings</span>
+                  <span className="hidden lg:block text-[12px] font-medium text-ink-500">{all.filter((l) => l.pillar === p.id).length} listings</span>
                 </span>
               </button>
             )

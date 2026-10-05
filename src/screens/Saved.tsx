@@ -3,13 +3,14 @@ import { BackHeader, StackScroll } from '../components/Chrome'
 import { ListingCard } from '../components/ListingCard'
 import { Button } from '../components/ui'
 import { useNav } from '../lib/nav'
-import { getListing, PILLARS } from '../lib/data'
+import { useAllListings, PILLARS } from '../lib/data'
 import type { Listing } from '../lib/types'
 
 export function Saved() {
   const { saved, setTab, back } = useNav()
+  const allListings = useAllListings()
 
-  const items = saved.map(getListing).filter((l): l is Listing => !!l)
+  const items = saved.map((id) => allListings.find(l => l.id === id)).filter((l): l is Listing => !!l)
   const groups = PILLARS.map((p) => ({
     pillar: p,
     listings: items.filter((l) => l.pillar === p.id),

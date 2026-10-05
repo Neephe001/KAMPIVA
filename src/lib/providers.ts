@@ -24,7 +24,7 @@ export interface SectorInfo {
 
 export const SECTORS: SectorInfo[] = [
   {
-    id: 'market', name: 'Market', full: 'Kampiva Market', role: 'Seller', icon: ShoppingBag,
+    id: 'market', name: 'U-Market', full: 'Kampiva U-Market', role: 'Seller', icon: ShoppingBag,
     title: 'Sell items or services',
     blurb: 'Students and campus businesses. Sell gadgets, books and food, or offer hair, tutoring and repairs.',
     cta: 'Start selling',
@@ -32,7 +32,7 @@ export const SECTORS: SectorInfo[] = [
     review: 'Verified students go live instantly',
   },
   {
-    id: 'research', name: 'Research', full: 'Kampiva Research', role: 'Lab owner', icon: FlaskConical,
+    id: 'research', name: 'U-Research', full: 'Kampiva U-Research', role: 'Lab owner', icon: FlaskConical,
     title: 'List lab equipment',
     blurb: 'Departments, labs and researchers. Earn from equipment that sits idle and help other projects move.',
     cta: 'List equipment',
@@ -40,7 +40,7 @@ export const SECTORS: SectorInfo[] = [
     review: 'Reviewed by the partnerships team in 1 to 2 days',
   },
   {
-    id: 'stay', name: 'Stay', full: 'Kampiva Stay', role: 'Host', icon: KeyRound,
+    id: 'stay', name: 'U-Stay', full: 'Kampiva U-Stay', role: 'Host', icon: KeyRound,
     title: 'List rooms or hostels',
     blurb: 'Landlords, agents and students handing over bed spaces. We check the property, then students find you.',
     cta: 'List a property',
@@ -48,7 +48,7 @@ export const SECTORS: SectorInfo[] = [
     review: 'We inspect the property before it goes live',
   },
   {
-    id: 'move', name: 'Move', full: 'Kampiva Move', role: 'Driver', icon: Car,
+    id: 'move', name: 'U-Move', full: 'Kampiva U-Move', role: 'Driver', icon: Car,
     title: 'Offer rides',
     blurb: 'Keke riders, shuttle operators and students driving home. Fill empty seats on routes you already run.',
     cta: 'Offer rides',

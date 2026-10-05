@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, BadgeCheck, Eye, EyeOff } from 'lucide-react'
 import { Btn, Img, KampivaLogo, useGo, type Go } from './shared'
 import { img, PILLARS } from './data'
 import { EMAIL_RE, session, useUser } from '../lib/session'
+import api from '../lib/axios'
 
 
 const input =
@@ -71,9 +72,9 @@ function AuthLayout({ go, children }: { go: Go; children: ReactNode }) {
     <div className="min-h-dvh bg-white p-3 lg:p-4 grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] gap-4">
       <Slides go={go} />
       <main className="flex flex-col px-3 sm:px-10 py-3">
-        <div className="flex items-center justify-between gap-4">
+        <div className="relative flex items-center justify-center">
           <button onClick={() => go('home')} aria-label="Kampiva home" className="rounded-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-lime-400/50"><KampivaLogo className="h-10" /></button>
-          <button onClick={() => go('home')} className="inline-flex min-h-10 items-center gap-2 rounded-full px-3 text-[14px] font-medium text-ink-500 transition hover:bg-sand hover:text-ink lg:hidden">
+          <button onClick={() => go('home')} className="absolute right-0 inline-flex min-h-10 items-center gap-2 rounded-full px-3 text-[14px] font-medium text-ink-500 transition hover:bg-sand hover:text-ink lg:hidden">
             <ArrowLeft size={16} /> Back to site
           </button>
         </div>
@@ -179,14 +180,35 @@ export function Login({ go }: { go: Go }) {
   const [pw, setPw] = useState('')
   const [err, setErr] = useState('')
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!EMAIL_RE.test(id)) return setErr('Enter the email you signed up with.')
     if (pw.length < 6) return setErr('Password must be at least 6 characters.')
     setErr('')
-    try { sessionStorage.removeItem('kv-just-signed-up') } catch { /* ignore */ }
-    session.signIn(id)
-    landAfterAuth(navigate)
+    try {
+      const res = await api.post('/auth/login', { email: id, password: pw })
+      try { sessionStorage.removeItem('kv-just-signed-up') } catch { /* ignore */ }
+      session.signIn(res.data.user.email)
+      
+      // The frontend expects the account in a specific format
+      const nameParts = res.data.user.name.split(' ')
+      const first = nameParts[0] || ''
+      const last = nameParts.slice(1).join(' ') || ''
+      
+      session.saveAccount({
+        email: res.data.user.email,
+        first,
+        last,
+        phone: '',
+        campusStatus: 'other',
+        kind: 'member',
+        sectors: []
+      })
+      
+      landAfterAuth(navigate)
+    } catch (err: any) {
+      setErr(err.response?.data?.message || 'Failed to log in.')
+    }
   }
 
   return (
@@ -233,8 +255,8 @@ const ACCOUNTS = [] // kept as empty placeholder; member/provider choice happens
 
 export function Signup({ go }: { go: Go }) {
   const navigate = useNavigate()
-  // §2.1: 3 steps — 1: credentials, 2: email OTP, 3: full name
-  const TOTAL = 3
+  // §2.1: 2 steps — 1: credentials & name, 2: email OTP
+  const TOTAL = 2
   const [step, setStep] = useState(0)
   const [email, setEmail] = useState('')
   const [pw, setPw] = useState('')
@@ -243,33 +265,40 @@ export function Signup({ go }: { go: Go }) {
   const [err, setErr] = useState('')
   const timer = useResendTimer()
 
-  const next = (e?: React.FormEvent) => {
+  const next = async (e?: React.FormEvent) => {
     e?.preventDefault()
     setErr('')
 
     if (step === 0) {
       if (!EMAIL_RE.test(email)) return setErr('Enter a valid email address.')
       if (pw.length < 8) return setErr('Password needs at least 8 characters.')
-      timer.restart()
-      setStep(1)
+      const trimmed = fullName.trim()
+      if (!trimmed || !trimmed.includes(' ')) return setErr('Enter your first and last name.')
+      
+      try {
+        await api.post('/auth/register', { name: trimmed, email, password: pw })
+        timer.restart()
+        setStep(1)
+      } catch (err: any) {
+        setErr(err.response?.data?.message || 'Registration failed.')
+      }
       return
     }
 
     if (step === 1) {
       if (code.join('').length < 6) return setErr('Enter all 6 digits.')
-      setStep(2)
+      try {
+        await api.post('/auth/verify-email', { email, token: code.join('') })
+        // Verified! Save account and log in
+        const [first, ...rest] = fullName.trim().split(' ')
+        session.saveAccount({ email, first, last: rest.join(' '), phone: '', campusStatus: 'other', kind: 'member', sectors: [] })
+        session.signIn(email)
+        landAfterAuth(navigate)
+      } catch (err: any) {
+        setErr(err.response?.data?.message || 'Verification failed.')
+      }
       return
     }
-
-    // step === 2: save name and sign in
-    const trimmed = fullName.trim()
-    if (!trimmed || !trimmed.includes(' ')) return setErr('Enter your first and last name.')
-    const [first, ...rest] = trimmed.split(' ')
-    const last = rest.join(' ')
-    // §2.1: sign-up collects only name + credentials. Phone/campus/matric stay in provider onboarding.
-    session.saveAccount({ email, first, last, phone: '', campusStatus: 'other', kind: 'member', sectors: [] })
-    session.signIn(email)
-    landAfterAuth(navigate)
   }
 
   const strength = Math.min(4, [pw.length >= 8, /[A-Z]/.test(pw), /\d/.test(pw), /[^a-z0-9]/i.test(pw)].filter(Boolean).length)
@@ -281,6 +310,19 @@ export function Signup({ go }: { go: Go }) {
           <>
             <Head step={[1, TOTAL]} title="Get started" sub="Welcome to Kampiva. Let's create your KampivaID." />
             <div className="space-y-5">
+              <div>
+                <label className={label} htmlFor="su-name">Full name</label>
+                <input
+                  id="su-name"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="e.g. Amina Bello"
+                  className={input}
+                  autoComplete="name"
+                  autoFocus
+                />
+              </div>
               <div>
                 <label className={label} htmlFor="su-email">Your email</label>
                 <input id="su-email" type="email" value={email} onChange={(e) => setEmail(e.target.value.trim())} placeholder="you@example.com" className={input} autoComplete="email" />
@@ -301,31 +343,12 @@ export function Signup({ go }: { go: Go }) {
             <Head step={[2, TOTAL]} title="Verify your email" sub={<>We sent a 6-digit code to <b className="text-ink break-all">{email}</b></>} />
             <OtpInput code={code} setCode={setCode} />
             <p className="mt-5 text-[14px] text-ink-500">
-              Didn't get it? <Resend timer={timer} /> or <button type="button" onClick={() => setStep(0)} className="font-semibold text-olive-700 hover:underline">change email</button>
+              Didn't get it? <Resend timer={timer} onResend={() => api.post('/auth/resend-verification', { email }).catch(() => {})} /> or <button type="button" onClick={() => setStep(0)} className="font-semibold text-olive-700 hover:underline">change email</button>
             </p>
           </>
         )}
 
-        {step === 2 && (
-          <>
-            {/* §2.1 Screen 21 step 3: full name only */}
-            <Head step={[3, TOTAL]} title="What's your name?" sub="This is how other verified members will see you on Kampiva." />
-            <div>
-              <label className={label} htmlFor="su-name">Full name</label>
-              <input
-                id="su-name"
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Amina Bello"
-                className={input}
-                autoComplete="name"
-                autoFocus
-              />
-              <p className="mt-2 text-[12.5px] text-ink-500">Enter your first and last name as on your campus ID.</p>
-            </div>
-          </>
-        )}
+
 
         {err && <p className="mt-5 text-[13px] text-alert" role="alert">{err}</p>}
         <div className="mt-7 flex gap-3">

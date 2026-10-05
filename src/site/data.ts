@@ -33,12 +33,85 @@ export type Pillar = {
   items: Listing[]
 }
 
-import { LISTINGS, PEOPLE } from '../lib/data'
+import { PEOPLE } from '../lib/data'
 import type { Listing as AppListing } from '../lib/types'
+
+const LISTINGS: AppListing[] = [
+  {
+    id: 'm1', pillar: 'market', title: 'Engineering Drawing Set + T-Square', category: 'Textbooks & Tools',
+    price: 8500, condition: 'Used, like new', location: 'Faculty of Engineering', sellerId: 'u-taiwo',
+    image: '1503676260728-1c00da094a0b', postedAgo: '2h ago', rating: 4.8, reviewCount: 12, promoted: true,
+    tags: ['Verified seller', 'Meetup on campus'],
+    description: 'Complete technical drawing set: T-square, set squares, compass and case.',
+  },
+  {
+    id: 'm2', pillar: 'market', title: 'HP Pavilion Laptop · Core i5, 8GB', category: 'Electronics',
+    price: 185000, condition: 'Used, good', location: 'New Hall B', sellerId: 'u-taiwo',
+    image: '1496181133206-80ce9b88a853', postedAgo: '5h ago', rating: 4.8, reviewCount: 47,
+    tags: ['Verified seller', 'Negotiable'],
+    description: 'Reliable study laptop.',
+  },
+  {
+    id: 'm3', pillar: 'market', title: 'Graphic Design · Logos & Flyers', category: 'Student Services',
+    priceLabel: 'From ₦3,000', priceUnit: 'per design', location: 'Remote / campus', sellerId: 'u-blessing',
+    image: '1626785774573-4b799315345d', postedAgo: '1d ago', rating: 4.6, reviewCount: 21,
+    tags: ['Service', 'Fast delivery'],
+    description: 'I design logos, event flyers and social media graphics.',
+  },
+  {
+    id: 'm4', pillar: 'market', title: 'Mini Fridge · 90L', category: 'Home & Living',
+    price: 42000, condition: 'Used, fair', location: 'Off-campus, Harmony Estate', sellerId: 'u-blessing',
+    image: '1571175443880-49e1d25b2bc5', postedAgo: '2d ago', rating: 4.6, reviewCount: 9,
+    tags: ['Pickup only'],
+    description: 'Compact fridge, great for a hostel room.',
+  },
+  {
+    id: 'r-eq1', pillar: 'research', title: 'UV-Vis Spectrophotometer', category: 'Analytical Instruments',
+    priceLabel: 'Free', location: 'Central Lab', sellerId: 'u-chem-lab',
+    image: '1579154204601-01588f351e67', postedAgo: 'Updated 3d ago', availability: 'Available',
+    tags: ['Institutional'],
+    description: 'Double-beam UV-Vis spectrophotometer.',
+  },
+  {
+    id: 'r-eq2', pillar: 'research', title: 'Benchtop Centrifuge', category: 'Sample Prep',
+    priceLabel: 'Free', location: 'Biochemistry Lab 2', sellerId: 'u-samuel',
+    image: '1532187863486-abf9dbad1b69', postedAgo: 'Updated 1w ago', availability: 'Available',
+    tags: ['Institutional'],
+    description: 'Refrigerated benchtop centrifuge.',
+  },
+  {
+    id: 's1', pillar: 'stay', title: 'Self-Contained Room', category: 'Self-contained',
+    price: 450000, priceUnit: 'per year', location: 'Harmony Estate', sellerId: 'u-bukola',
+    image: '1522708323590-d24dbb6b0267', postedAgo: '3d ago', rating: 4.5, reviewCount: 33,
+    availability: 'Enquiry & viewing', tags: ['Verified landlord'],
+    description: 'Clean self-contained room in a secure, gated compound.',
+  },
+  {
+    id: 's2', pillar: 'stay', title: 'Shared 2-Bed Flat', category: 'Shared apartment',
+    price: 280000, priceUnit: 'per year', location: 'Peace Court', sellerId: 'u-bukola',
+    image: '1502672260266-1c1ef2d93688', postedAgo: '5d ago', rating: 4.5, reviewCount: 12,
+    availability: 'Enquiry', tags: ['Verified landlord'],
+    description: 'One space left in a shared 2-bedroom flat.',
+  },
+  {
+    id: 'mv1', pillar: 'move', title: 'Morning Run · Main Gate → GRA', category: 'Daily commute',
+    priceLabel: '₦500', priceUnit: 'per seat', location: 'Departs 7:30 AM', sellerId: 'u-chioma',
+    image: '1449965408869-eaa3f722e40d', postedAgo: 'Recurring', availability: '3 of 4 seats open',
+    tags: ['Verified driver', 'Daily'],
+    description: 'Daily morning run.',
+  },
+  {
+    id: 'mv2', pillar: 'move', title: 'Campus Shuttle · North Loop', category: 'Shuttle route',
+    priceLabel: '₦200', priceUnit: 'per ride', location: 'Every 20 min', sellerId: 'u-transport',
+    image: '1544620347-c4fd4a3d5957', postedAgo: 'Live schedule', availability: 'Running now',
+    tags: ['Institutional', 'Fixed stops'],
+    description: 'Official campus shuttle.',
+  },
+]
 
 export const img = (id: string, w: number, h: number) => {
   if (!id) return ''
-  if (id.startsWith('http://') || id.startsWith('https://')) return id
+  if (id.startsWith('http://') || id.startsWith('https://') || id.startsWith('/')) return id
   const path = id.startsWith('photo-') ? id : `photo-${id}`
   return `https://images.unsplash.com/${path}?w=${w}&h=${h}&fit=crop&auto=format&q=80`
 }
@@ -79,7 +152,7 @@ const toSiteListing = (listing: AppListing): Listing => ({
 const pillarMeta: Record<PillarKey, Omit<Pillar, 'items'>> = {
   market: {
     key: 'market',
-    name: 'Market',
+    name: 'U-Market',
     noun: 'Items and services',
     short: 'Buy and sell textbooks, gadgets and hostel stuff. Book services like hair, tutoring and repairs.',
     headline: 'Buy and sell with students you can trust.',
@@ -89,13 +162,13 @@ const pillarMeta: Record<PillarKey, Omit<Pillar, 'items'>> = {
     primary: 'Buy now',
     secondary: (by) => `Message ${by}`,
     gate: 'buy this',
-    hero: 'photo-1680879275304-bbe20f7e28fb',
+    hero: '/hero-market.jpg',
     heroAlt: 'Student browsing listings on her phone',
     steps: [['Find it', 'Search or filter by category and location on campus.'], ['Chat safely', 'Agree on price in the app. Your number stays private.'], ['Meet and rate', 'Pick up on campus, then rate the seller.']],
   },
   research: {
     key: 'research',
-    name: 'Research',
+    name: 'U-Research',
     noun: 'Lab equipment',
     short: 'Borrow lab equipment from other departments by the hour or day, and find research assistants.',
     headline: 'Get the equipment your project needs.',
@@ -111,7 +184,7 @@ const pillarMeta: Record<PillarKey, Omit<Pillar, 'items'>> = {
   },
   stay: {
     key: 'stay',
-    name: 'Stay',
+    name: 'U-Stay',
     noun: 'Rooms and hostels',
     short: 'Find hostels and rooms near campus from landlords we have checked, with reviews from students.',
     headline: 'Find a room without the agent wahala.',
@@ -127,7 +200,7 @@ const pillarMeta: Record<PillarKey, Omit<Pillar, 'items'>> = {
   },
   move: {
     key: 'move',
-    name: 'Move',
+    name: 'U-Move',
     noun: 'Rides',
     short: 'Share a keke or shuttle to your faculty, the gate or town, and split the fare with students.',
     headline: 'Share the ride. Split the fare.',
