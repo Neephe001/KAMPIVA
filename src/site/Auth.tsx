@@ -179,56 +179,122 @@ export function Login({ go }: { go: Go }) {
   const [id, setId] = useState(fresh ?? session.account()?.email ?? '')
   const [pw, setPw] = useState('')
   const [err, setErr] = useState('')
+  const [step, setStep] = useState(0)
+  const [code, setCode] = useState(['', '', '', '', '', ''])
+  const timer = useResendTimer()
+
+  const handleLoginSuccess = async (res: any) => {
+    try { sessionStorage.removeItem('kv-just-signed-up') } catch { /* ignore */ }
+    session.signIn(res.data.user.email)
+    
+    // Fetch provider status
+    try {
+      const { sectorStore, roleStore } = await import('../lib/nav')
+      const provRes = await api.get('/providers/status')
+      const providers = provRes.data.providers
+      if (providers && providers.length > 0) {
+        sectorStore.set((prev) => {
+          const next = { ...prev }
+          providers.forEach((p: any) => {
+            next[p.sector as keyof typeof next] = p.status
+          })
+          return next
+        })
+        roleStore.set('provider')
+      }
+    } catch (err) {
+      console.error('Failed to fetch provider status', err)
+    }
+    
+    // The frontend expects the account in a specific format
+    const nameParts = res.data.user.name.split(' ')
+    const first = nameParts[0] || ''
+    const last = nameParts.slice(1).join(' ') || ''
+    
+    session.saveAccount({
+      email: res.data.user.email,
+      first,
+      last,
+      phone: '',
+      campusStatus: 'other',
+      kind: 'member',
+      sectors: []
+    })
+    
+    landAfterAuth(navigate)
+  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!EMAIL_RE.test(id)) return setErr('Enter the email you signed up with.')
-    if (pw.length < 6) return setErr('Password must be at least 6 characters.')
     setErr('')
-    try {
-      const res = await api.post('/auth/login', { email: id, password: pw })
-      try { sessionStorage.removeItem('kv-just-signed-up') } catch { /* ignore */ }
-      session.signIn(res.data.user.email)
-      
-      // The frontend expects the account in a specific format
-      const nameParts = res.data.user.name.split(' ')
-      const first = nameParts[0] || ''
-      const last = nameParts.slice(1).join(' ') || ''
-      
-      session.saveAccount({
-        email: res.data.user.email,
-        first,
-        last,
-        phone: '',
-        campusStatus: 'other',
-        kind: 'member',
-        sectors: []
-      })
-      
-      landAfterAuth(navigate)
-    } catch (err: any) {
-      setErr(err.response?.data?.message || 'Failed to log in.')
+
+    if (step === 0) {
+      if (!EMAIL_RE.test(id)) return setErr('Enter the email you signed up with.')
+      if (pw.length < 6) return setErr('Password must be at least 6 characters.')
+      try {
+        const res = await api.post('/auth/login', { email: id, password: pw })
+        await handleLoginSuccess(res)
+      } catch (err: any) {
+        if (err.response?.data?.requiresVerification) {
+          timer.restart()
+          setStep(1)
+          setErr(err.response.data.message)
+        } else {
+          setErr(err.response?.data?.message || 'Failed to log in.')
+        }
+      }
+      return
+    }
+
+    if (step === 1) {
+      if (code.join('').length < 6) return setErr('Enter all 6 digits.')
+      try {
+        await api.post('/auth/verify-email', { email: id, token: code.join('') })
+        // After successful verification, try logging in again
+        const res = await api.post('/auth/login', { email: id, password: pw })
+        await handleLoginSuccess(res)
+      } catch (err: any) {
+        setErr(err.response?.data?.message || 'Verification failed.')
+      }
+      return
     }
   }
 
   return (
     <AuthLayout go={go}>
-      <Head title="Welcome back" sub={fresh ? 'Your password is updated. Log in to continue.' : session.peekLaunch() ? 'Log in and we will take you straight to what you were doing.' : 'Log in to your KampivaID to pick up where you left off.'} />
-      <form onSubmit={submit} className="space-y-5" noValidate>
-        <div>
-          <label className={label} htmlFor="li-email">Your email</label>
-          <input id="li-email" type="email" value={id} onChange={(e) => setId(e.target.value.trim())} placeholder="you@example.com" className={input} autoComplete="username" />
+      {step === 0 && (
+        <div className="animate-rise">
+          <Head title="Welcome back" sub={fresh ? 'Your password is updated. Log in to continue.' : session.peekLaunch() ? 'Log in and we will take you straight to what you were doing.' : 'Log in to your KampivaID to pick up where you left off.'} />
+          <form onSubmit={submit} className="space-y-5" noValidate>
+            <div>
+              <label className={label} htmlFor="li-email">Your email</label>
+              <input id="li-email" type="email" value={id} onChange={(e) => setId(e.target.value.trim())} placeholder="you@example.com" className={input} autoComplete="username" />
+            </div>
+            <div>
+              <div className="flex items-center justify-between"><label className={label} htmlFor="li-pw">Password</label><button type="button" onClick={() => go('forgot')} className="mb-2 min-h-8 text-[13px] font-semibold text-olive-700 hover:underline">Forgot password?</button></div>
+              <Password id="li-pw" value={pw} onChange={setPw} placeholder="Your password" />
+            </div>
+            {err && <p className="text-[13px] text-alert" role="alert">{err}</p>}
+            <Btn type="submit" className="w-full">Log in</Btn>
+          </form>
+          <p className="mt-6 text-center text-[14px] text-ink-500">
+            New to Kampiva? <button onClick={() => go('signup')} className="min-h-8 font-semibold text-ink underline underline-offset-4 decoration-lime-400 decoration-2">Create an account</button>
+          </p>
         </div>
-        <div>
-          <div className="flex items-center justify-between"><label className={label} htmlFor="li-pw">Password</label><button type="button" onClick={() => go('forgot')} className="mb-2 min-h-8 text-[13px] font-semibold text-olive-700 hover:underline">Forgot password?</button></div>
-          <Password id="li-pw" value={pw} onChange={setPw} placeholder="Your password" />
-        </div>
-        {err && <p className="text-[13px] text-alert" role="alert">{err}</p>}
-        <Btn type="submit" className="w-full">Log in</Btn>
-      </form>
-      <p className="mt-6 text-center text-[14px] text-ink-500">
-        New to Kampiva? <button onClick={() => go('signup')} className="min-h-8 font-semibold text-ink underline underline-offset-4 decoration-lime-400 decoration-2">Create an account</button>
-      </p>
+      )}
+      {step === 1 && (
+        <form onSubmit={submit} className="animate-rise" noValidate>
+          <Head title="Verify your email" sub={<>We sent a 6-digit code to <b className="text-ink break-all">{id}</b></>} />
+          <OtpInput code={code} setCode={setCode} />
+          <p className="mt-5 text-[14px] text-ink-500">
+            Didn't get it? <Resend timer={timer} onResend={() => api.post('/auth/resend-verification', { email: id }).catch(() => {})} /> or <button type="button" onClick={() => { setStep(0); setErr(''); }} className="font-semibold text-olive-700 hover:underline">go back</button>
+          </p>
+          {err && <p className="mt-5 text-[13px] text-alert" role="alert">{err}</p>}
+          <div className="mt-7 flex gap-3">
+            <Btn type="submit" className="flex-1">Verify and log in</Btn>
+          </div>
+        </form>
+      )}
     </AuthLayout>
   )
 }

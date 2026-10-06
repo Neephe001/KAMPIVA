@@ -51,18 +51,35 @@ export function ProviderOnboarding({ initial }: { initial?: Pillar }) {
     setI(i + 1)
   }
 
-  const submit = () => {
+  const submit = async () => {
     if (!sector) return
     setPhase('submitting')
-    window.setTimeout(() => {
-      // Verified students selling in Market are approved on the spot; everything else is reviewed.
-      const active = sector === 'market' && data.who === 'Student'
-      userListings.set((l) => [...listingsFromFlow(sector, data, !active), ...l])
+    try {
+      const { default: api } = await import('../lib/axios')
+      const listings = listingsFromFlow(sector, data, false) // send all listings to backend to create
+      const res = await api.post('/providers/apply', {
+        sector,
+        data,
+        listings
+      })
+
+      const { active, applicationId, provider, listings: createdListings } = res.data
+
+      // Update local listing store with the ones returned from the backend
+      if (createdListings && createdListings.length) {
+        userListings.set((l) => [...createdListings, ...l])
+      }
+
       setSector(sector, active ? 'active' : 'pending')
       roleStore.set('provider')
-      setResult({ active, id: `KV-${String(Math.floor(100000 + Math.random() * 900000))}` })
+      setResult({ active, id: applicationId })
       setPhase('done')
-    }, 1500)
+    } catch (err) {
+      console.error('Failed to submit provider application', err)
+      // fallback to old logic or show error
+      setPhase('flow')
+      setShow(true)
+    }
   }
 
   const header = (
