@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ShieldCheck, MessageCircle, Star, Tag, Bell, CalendarClock, ChevronRight, CheckCheck, Info, ClipboardList } from 'lucide-react'
 import { ScreenScroll } from '../components/Chrome'
 import { Button, Sheet } from '../components/ui'
-import { NOTIFICATIONS, PILLARS } from '../lib/data'
+import { notifications, fetchNotifications, markNotificationRead, markAllNotificationsRead, PILLARS } from '../lib/data'
 import { useNav, type Screen } from '../lib/nav'
 import type { AppNotification } from '../lib/types'
 import { ordersStore } from '../lib/orders'
@@ -43,17 +43,25 @@ const GROUPS = [
 
 export function Activity() {
   const { push } = useNav()
-  const [read, setRead] = useState<string[]>(NOTIFICATIONS.filter((n) => !n.unread).map((n) => n.id))
+  
+  // Use API-backed store
+  const allList = notifications.use()
+  useEffect(() => { fetchNotifications() }, [])
+
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
   const [open, setOpen] = useState<AppNotification | null>(null)
-  const unread = NOTIFICATIONS.filter((n) => !read.includes(n.id)).length
-  const list = NOTIFICATIONS.filter((n) => filter === 'all' || !read.includes(n.id))
+  
+  const unread = allList.filter((n) => n.unread).length
+  const list = allList.filter((n) => filter === 'all' || n.unread)
+
   // §2.6 – live order count for the Orders shortcut
   const orders = ordersStore.use()
   const activeOrders = orders.filter((o) => ['enquiry','requested','accepted','marked_paid','payment_confirmed','in_progress'].includes(o.status) && (o.buyerId === 'u-me' || o.providerId === 'u-me'))
 
   const select = (n: AppNotification) => {
-    setRead((r) => (r.includes(n.id) ? r : [...r, n.id]))
+    if (n.unread) {
+      markNotificationRead(n.id)
+    }
     const action = ACTION[n.type]
     if (action) push(action.screen)
     else setOpen(n)
@@ -67,7 +75,7 @@ export function Activity() {
           <p className="text-[13px] text-ink-500">{unread > 0 ? `${unread} unread update${unread > 1 ? 's' : ''}` : 'You are all caught up'}</p>
         </div>
         <button
-          onClick={() => setRead(NOTIFICATIONS.map((n) => n.id))}
+          onClick={() => markAllNotificationsRead()}
           disabled={unread === 0}
           className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand disabled:text-ink-400"
         >
@@ -115,7 +123,7 @@ export function Activity() {
                   const pillar = n.pillar ? PILLARS.find((p) => p.id === n.pillar) : null
                   const color = pillar?.color ?? '#556522'
                   const soft = pillar?.soft ?? '#f3f7e4'
-                  const isUnread = !read.includes(n.id)
+                  const isUnread = n.unread
                   const action = ACTION[n.type]
                   return (
                     <button key={n.id} onClick={() => select(n)} className={`group w-full flex gap-3 px-4 py-3.5 text-left transition hover:bg-soft ${isUnread ? 'bg-lime-400/[0.07]' : ''}`}>

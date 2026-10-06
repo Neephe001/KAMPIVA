@@ -49,9 +49,11 @@ function buildUser(): Person {
       initials: `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase() || 'K',
       level: status,
       faculty: a.matric ? `Matric ${a.matric.toUpperCase()}` : a.staffId ? `Staff ID ${a.staffId}` : 'Kampiva member',
-      reviews: 0,
-      rating: undefined,
+      bio: a.bio,
+      reviews: a.reviewsCount ?? 0,
+      rating: a.rating,
       providerPillars: [],
+      memberSince: a.joinedAt ? new Date(a.joinedAt).toLocaleDateString([], { month: 'short', year: 'numeric' }) : 'Recently joined',
     }
   }
   if (email) {
@@ -61,49 +63,43 @@ function buildUser(): Person {
   return CURRENT_USER_BASE
 }
 
+let fetchedProfile = false
+export const fetchMyProfile = async () => {
+  if (fetchedProfile) return
+  fetchedProfile = true
+  try {
+    const { default: api } = await import('./axios')
+    const res = await api.get('/auth/me')
+    const u = res.data.user
+    const current = session.account()
+    if (u) {
+      session.saveAccount({
+        ...current,
+        email: u.email,
+        first: u.name.split(' ')[0],
+        last: u.name.split(' ').slice(1).join(' '),
+        campusStatus: u.campusStatus || 'student',
+        matric: u.matric,
+        staffId: u.staffId,
+        bio: u.bio,
+        rating: u.rating,
+        reviewsCount: u.reviewsCount,
+        avatarUrl: u.avatarUrl,
+        joinedAt: u.createdAt,
+      } as any)
+      // Force UI update by triggering session listeners
+      session.signIn(u.email)
+    }
+  } catch (err) {
+    console.error('Failed to fetch profile', err)
+  }
+}
+
 /** Always reflects the current session, so any module can read `CURRENT_USER.name`. */
 export const CURRENT_USER: Person = new Proxy({} as Person, {
   get: (_t, key: string) => (buildUser() as unknown as Record<string, unknown>)[key],
 })
 
-export const PEOPLE: Record<string, Person> = {
-  'u-taiwo': {
-    id: 'u-taiwo', name: "Taiwo God'swill", initials: 'TG', level: '400 Level',
-    faculty: 'Faculty of Physical Sciences', verified: true, rating: 4.8, reviews: 47,
-    responseTime: 'Usually replies in ~15 min', memberSince: 'Sep 2025', providerPillars: ['market'],
-  },
-  'u-blessing': {
-    id: 'u-blessing', name: 'Blessing Adeyemi', initials: 'BA', level: '200 Level',
-    faculty: 'Faculty of Arts', verified: true, rating: 4.6, reviews: 21,
-    responseTime: 'Usually replies in ~1 hr', memberSince: 'Feb 2026', providerPillars: ['market'],
-  },
-  'u-chem-lab': {
-    id: 'u-chem-lab', name: 'Dept. of Chemistry · Central Lab', initials: 'CL',
-    faculty: 'Faculty of Physical Sciences', verified: true, institutional: true,
-    rating: 4.9, reviews: 8, responseTime: 'Requests reviewed within 24 hrs', memberSince: 'Institutional partner',
-    providerPillars: ['research'],
-  },
-  'u-samuel': {
-    id: 'u-samuel', name: 'Samuel Smith', initials: 'SS', faculty: 'Lab Coordinator, Biochemistry',
-    verified: true, institutional: true, rating: 4.7, reviews: 5,
-    responseTime: 'Requests reviewed within 24 hrs', memberSince: 'Institutional partner', providerPillars: ['research'],
-  },
-  'u-bukola': {
-    id: 'u-bukola', name: 'Olawole Bukola', initials: 'OB', faculty: 'Verified Property Manager',
-    verified: true, rating: 4.5, reviews: 33, responseTime: 'Usually replies in ~2 hrs',
-    memberSince: 'Nov 2025', providerPillars: ['stay'],
-  },
-  'u-chioma': {
-    id: 'u-chioma', name: 'Chioma Grace', initials: 'CG', faculty: 'Verified Driver · Staff',
-    verified: true, rating: 4.9, reviews: 128, responseTime: 'Usually replies in ~5 min',
-    memberSince: 'Oct 2025', providerPillars: ['move'],
-  },
-  'u-transport': {
-    id: 'u-transport', name: 'University Shuttle Service', initials: 'US', faculty: 'Campus Transport Committee',
-    verified: true, institutional: true, rating: 4.4, reviews: 210, memberSince: 'Institutional partner',
-    providerPillars: ['move'],
-  },
-}
 
 const img = (id: string, w = 800, h = 600) =>
   `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&auto=format`
@@ -123,45 +119,90 @@ export const fetchListings = async () => {
   }
 }
 
-export const THREADS: ChatThread[] = [
-  {
-    id: 't1', personId: 'u-taiwo', pillar: 'market', listingId: 'm1',
-    listingTitle: 'Engineering Drawing Set + T-Square', lastMessage: 'Sure, I can meet at the faculty car park at 4pm.',
-    lastTime: '10:42', unread: 2,
-    messages: [
-      { id: 'm1', fromMe: true, type: 'text', text: 'Hi, is the drawing set still available?', time: '10:30' },
-      { id: 'm2', fromMe: false, type: 'text', text: 'Yes it is! Are you on campus today?', time: '10:38' },
-      { id: 'm3', fromMe: true, type: 'text', text: 'Yes, can we meet later this afternoon?', time: '10:40' },
-      { id: 'm4', fromMe: false, type: 'text', text: 'Sure, I can meet at the faculty car park at 4pm.', time: '10:42' },
-    ],
-  },
-  {
-    id: 't2', personId: 'u-bukola', pillar: 'stay', listingId: 's1',
-    listingTitle: 'Self-Contained Room · Harmony Estate', lastMessage: 'A viewing on Saturday morning works. I will confirm.',
-    lastTime: 'Yesterday', unread: 0,
-    messages: [
-      { id: 'm1', fromMe: true, type: 'text', text: 'Good day, I would like to arrange a viewing for the self-con.', time: 'Yesterday' },
-      { id: 'm2', fromMe: false, type: 'text', text: 'A viewing on Saturday morning works. I will confirm.', time: 'Yesterday' },
-    ],
-  },
-  {
-    id: 't3', personId: 'u-chioma', pillar: 'move', listingId: 'mv1',
-    listingTitle: 'Morning Run · Main Gate → GRA', lastMessage: 'Seat reserved for tomorrow 7:30. See you!',
-    lastTime: 'Mon', unread: 0,
-    messages: [
-      { id: 'm1', fromMe: true, type: 'text', text: 'Can I reserve a seat for tomorrow morning?', time: 'Mon' },
-      { id: 'm2', fromMe: false, type: 'text', text: 'Seat reserved for tomorrow 7:30. See you!', time: 'Mon' },
-    ],
-  },
-]
+export const chatThreads = persisted<ChatThread[]>('kv-chat-threads', [])
 
-export const NOTIFICATIONS: AppNotification[] = [
-  { id: 'n1', type: 'verify', title: 'You are verified', body: 'Your KampivaID is active. You now have full access across all pillars.', time: '2h ago', unread: true, pillar: undefined },
-  { id: 'n2', type: 'message', title: 'New message from Taiwo God’swill', body: 'Sure, I can meet at the faculty car park at 4pm.', time: '3h ago', unread: true, pillar: 'market' },
-  { id: 'n3', type: 'enquiry', title: 'Viewing request update', body: 'Olawole Bukola proposed Saturday morning for your viewing.', time: '1d ago', unread: false, pillar: 'stay' },
-  { id: 'n4', type: 'review', title: 'New review on your listing', body: 'Ngozi left a 5-star review on your Engineering Drawing Set.', time: '2d ago', unread: false, pillar: 'market' },
-  { id: 'n5', type: 'listing', title: 'Your listing is live', body: 'HP Pavilion Laptop is now visible in Kampiva Market.', time: '3d ago', unread: false, pillar: 'market' },
-]
+let fetchedThreads = false
+export const fetchThreads = async () => {
+  if (fetchedThreads) return
+  fetchedThreads = true
+  try {
+    const res = await api.get('/chat')
+    const threads = res.data.threads.map((t: any) => {
+      const myId = CURRENT_USER.id // We might need to ensure CURRENT_USER has the actual ID, but for now we fallback
+      // The API populates participants. Let's find the other person by email.
+      const accountEmail = session.account()?.email
+      const other = t.participants.find((p: any) => p.email !== accountEmail) || t.participants[0]
+      return {
+        id: t._id,
+        personId: other?._id || 'unknown',
+        personName: other?.name || 'Kampiva Member',
+        pillar: t.pillar,
+        listingId: t.listingId?._id,
+        listingTitle: t.listingId?.title || 'Unknown Listing',
+        lastMessage: t.lastMessage,
+        lastTime: new Date(t.lastTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        unread: t.unreadCounts?.[(session.account() as any)?._id] || 0,
+        messages: [] // Messages are fetched on demand in Chat.tsx
+      }
+    })
+    chatThreads.set(threads)
+  } catch (err) {
+    console.error('Failed to fetch threads', err)
+  }
+}
+
+export const notifications = persisted<AppNotification[]>('kv-notifications', [])
+
+let fetchedNotifications = false
+export const fetchNotifications = async () => {
+  if (fetchedNotifications) return
+  fetchedNotifications = true
+  try {
+    const res = await api.get('/notifications')
+    const notifs = res.data.notifications.map((n: any) => {
+      // Calculate time string (e.g. "2h ago")
+      const diffMs = Date.now() - new Date(n.createdAt).getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHrs = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHrs / 24);
+      let timeStr = 'now';
+      if (diffDays > 0) timeStr = `${diffDays}d ago`;
+      else if (diffHrs > 0) timeStr = `${diffHrs}h ago`;
+      else if (diffMins > 0) timeStr = `${diffMins}m ago`;
+
+      return {
+        id: n._id,
+        type: n.type,
+        title: n.title,
+        body: n.body,
+        time: timeStr,
+        unread: n.unread,
+        pillar: n.pillar,
+      }
+    })
+    notifications.set(notifs)
+  } catch (err) {
+    console.error('Failed to fetch notifications', err)
+  }
+}
+
+export const markNotificationRead = async (id: string) => {
+  try {
+    await api.put(`/notifications/${id}/read`)
+    notifications.set((prev) => prev.map((n) => n.id === id ? { ...n, unread: false } : n))
+  } catch (err) {
+    console.error('Failed to mark read', err)
+  }
+}
+
+export const markAllNotificationsRead = async () => {
+  try {
+    await api.put('/notifications/read-all')
+    notifications.set((prev) => prev.map((n) => ({ ...n, unread: false })))
+  } catch (err) {
+    console.error('Failed to mark all read', err)
+  }
+}
 
 export const MARKET_CATEGORIES = [
   'All', 'Electronics', 'Textbooks & Tools', 'Home & Living', 'Fashion', 'Student Services', 'Food',
@@ -169,26 +210,48 @@ export const MARKET_CATEGORIES = [
 
 export function getPerson(id: string): Person {
   if (id === CURRENT_USER.id) return CURRENT_USER
-  return PEOPLE[id] ?? CURRENT_USER
+  return { id, name: 'Kampiva User', initials: 'K', verified: true }
 }
 /** Listings a provider published from inside the app. Persisted so they survive a refresh. */
-export const userListings = persisted<Listing[]>('kv-listings', [])
+export const userListings = persisted<Listing[]>('kv-user-listings-api', []) // Use a new key to ignore old local db
+
+let fetchedMine = false
+export const fetchMyListings = async () => {
+  if (fetchedMine) return
+  fetchedMine = true
+  try {
+    const res = await api.get('/listings/me')
+    userListings.set(res.data.listings)
+  } catch (err) {
+    console.error('Failed to fetch my listings', err)
+  }
+}
+
 export const useAllListings = () => {
-  useEffect(() => { fetchListings() }, [])
+  useEffect(() => { 
+    fetchListings()
+    fetchMyListings()
+  }, [])
   const mine = userListings.use()
   const fetched = apiListings.use()
-  return [...mine.filter((l) => !l.draft), ...fetched]
+  const mineLive = mine.filter((l) => !l.draft)
+  const mineIds = new Set(mineLive.map((l) => l.id))
+  return [...mineLive, ...fetched.filter((l) => !mineIds.has(l.id))]
 }
 export function getListing(id: string) {
   return userListings.get().find((l) => l.id === id) ?? apiListings.get().find((l) => l.id === id)
 }
 export function listingsByPillar(p: Pillar) {
-  return [...userListings.get().filter((l) => !l.draft), ...apiListings.get()].filter((l) => l.pillar === p)
+  const mineLive = userListings.get().filter((l) => !l.draft)
+  const mineIds = new Set(mineLive.map((l) => l.id))
+  return [...mineLive, ...apiListings.get().filter((l) => !mineIds.has(l.id))].filter((l) => l.pillar === p)
 }
 
 export const useListing = (id: string) => {
-  const all = useAllListings()
-  return all.find((l) => l.id === id)
+  useEffect(() => { fetchListings() }, [])
+  const mine = userListings.use()
+  const fetched = apiListings.use()
+  return mine.find((l) => l.id === id) || fetched.find((l) => l.id === id)
 }
 export const useListingsByPillar = (p: Pillar) => {
   const all = useAllListings()

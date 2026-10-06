@@ -5,7 +5,7 @@ import { Btn, Eyebrow, Img, Reveal, useGo, useStartProvider } from './shared'
 import { img, naira, PILLARS, type PillarKey } from './data'
 import { JoinBand, PILLAR_ICON } from './Pages'
 import { SECTORS } from '../lib/providers'
-import { SEED_REVIEWS } from '../lib/reviews'
+import { useReviews } from '../lib/reviews'
 import { StarRow } from '../components/Reviews'
 import { useUser } from '../lib/session'
 
@@ -40,7 +40,8 @@ export function Landing() {
     navigate(`/${tab}${term ? `?q=${encodeURIComponent(term)}` : ''}`)
   }
   const quick = (k: PillarKey, t: string) => navigate(`/${k}?q=${encodeURIComponent(t)}`)
-  const top = [...SEED_REVIEWS].filter((r) => r.rating === 5).sort((a, b) => b.helpful - a.helpful).slice(0, 3)
+  const allReviews = useReviews()
+  const top = [...allReviews].filter((r) => r.rating === 5).sort((a, b) => b.helpful - a.helpful).slice(0, 3)
 
   return (
     <main>
@@ -162,7 +163,7 @@ export function Landing() {
                     <p className="text-[14px] font-medium text-olive-700">{p.noun}</p>
                     <p className="mt-3 text-[15px] leading-relaxed text-ink-700">{p.short}</p>
                     <div className="mt-5 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
-                      <Img src={it.photo} className="h-24 w-full object-cover" />
+                      <Img src={img(it.photo, 640, 400)} className="h-24 w-full object-cover" />
                       <div className="flex items-center justify-between gap-2 p-3 text-[13px]">
                         <span className="min-w-0 truncate font-medium">{it.title}</span>
                         <span className="shrink-0 font-display font-semibold">{naira(it.price)}</span>

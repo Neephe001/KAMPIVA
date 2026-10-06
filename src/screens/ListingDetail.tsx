@@ -289,7 +289,7 @@ export function ListingDetail({ id }: { id: string }) {
           <>
             <div className="flex gap-2.5">
               {cta.secondary && (
-                <Button variant="soft" color={pillar.color} size="lg" onClick={() => (listing.pillar === 'market' ? setSheet('offer') : push({ name: 'chat', id: seller.id }))}>
+                <Button variant="soft" color={pillar.color} size="lg" onClick={() => (listing.pillar === 'market' ? setSheet('offer') : push({ name: 'chat', id: seller.id, listingId: listing.id }))}>
                   {cta.secondary}
                 </Button>
               )}
@@ -299,7 +299,7 @@ export function ListingDetail({ id }: { id: string }) {
                 color={pillar.color}
                 onClick={() =>
                   listing.pillar === 'market'
-                    ? push({ name: 'chat', id: seller.id })
+                    ? push({ name: 'chat', id: seller.id, listingId: listing.id })
                     : setSheet('request')
                 }
               >

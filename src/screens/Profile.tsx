@@ -2,11 +2,11 @@ import {
   ShieldCheck, ChevronRight, HandCoins, LayoutDashboard, Star, Heart, Settings, HelpCircle,
   Bell, LogOut, Plus, ShoppingBag, FlaskConical, KeyRound, CarFront, Check, Flag,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CalendarClock, MessageCircle, Pencil, QrCode } from 'lucide-react'
 import { ScreenScroll } from '../components/Chrome'
 import { Avatar, Button, Field, Sheet, Toast, Toggle, VerifiedBadge, inputClass, useToast } from '../components/ui'
-import { CURRENT_USER, PILLARS, userListings } from '../lib/data'
+import { CURRENT_USER, PILLARS, userListings, fetchMyListings } from '../lib/data'
 import { useNav } from '../lib/nav'
 import { useNavigate } from 'react-router'
 import { session } from '../lib/session'
@@ -27,9 +27,10 @@ const REQUESTS = [
 ]
 
 export function Profile() {
-  const { role, setRole, push, saved, sectors, isProvider, becomeProvider } = useNav()
+  const { role, setRole, push, setTab, saved, sectors, isProvider, becomeProvider } = useNav()
   const navigate = useNavigate()
   const providerMode = isProvider && role === 'provider'
+  useEffect(() => { fetchMyListings() }, [])
   const myListings = userListings.use().filter((l) => !l.draft).length
   const [panel, setPanel] = useState<Panel>(null)
   const [helpTopic, setHelpTopic] = useState<'faq' | 'help' | 'safety' | null>(null)
@@ -37,7 +38,49 @@ export function Profile() {
   const [toast, showToast] = useToast()
   const [prefs, setPrefs] = useState({ messages: true, requests: true, reviews: true, deals: false, email: true })
   const [privacy, setPrivacy] = useState({ phone: false, faculty: true })
-  const [bio, setBio] = useState('Final year engineering student. Usually around the faculty and New Hall.')
+  const [profileForm, setProfileForm] = useState({
+    name: CURRENT_USER.name || '',
+    bio: CURRENT_USER.bio || '',
+  })
+  
+  // Sync when CURRENT_USER updates from fetch
+  useEffect(() => {
+    setProfileForm({
+      name: CURRENT_USER.name || '',
+      bio: CURRENT_USER.bio || 'Final year engineering student. Usually around the faculty and New Hall.',
+    })
+  }, [CURRENT_USER.name, CURRENT_USER.bio])
+
+  const [savingSettings, setSavingSettings] = useState(false)
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true)
+    try {
+      const { default: api } = await import('../lib/axios')
+      const res = await api.put('/auth/me', {
+        name: profileForm.name,
+        bio: profileForm.bio,
+      })
+      const u = res.data.user
+      const current = session.account()
+      if (u) {
+        session.saveAccount({
+          ...current,
+          first: u.name.split(' ')[0],
+          last: u.name.split(' ').slice(1).join(' '),
+          bio: u.bio,
+        } as any)
+        session.signIn(u.email) // trigger update
+      }
+      close()
+      showToast('Profile updated')
+    } catch (err) {
+      showToast('Failed to update profile')
+    } finally {
+      setSavingSettings(false)
+    }
+  }
+
   const close = () => { setPanel(null); setHelpTopic(null); setReportOpen(false) }
 
   return (
@@ -62,7 +105,7 @@ export function Profile() {
               <h2 className="mt-3 font-display font-bold text-[20px] text-ink">{CURRENT_USER.name}</h2>
               <p className="text-[13px] text-ink-500">{CURRENT_USER.level} · {CURRENT_USER.faculty}</p>
               <div className="mt-2"><VerifiedBadge label="KampivaID Verified" /></div>
-              <p className="mt-3 text-[13.5px] leading-relaxed text-ink-700">{bio}</p>
+              <p className="mt-3 text-[13.5px] leading-relaxed text-ink-700">{CURRENT_USER.bio || 'No bio yet.'}</p>
               <div className="mt-4 grid grid-cols-3 rounded-2xl bg-soft">
                 <MiniStat value={CURRENT_USER.rating ? CURRENT_USER.rating.toFixed(1) : 'New'} label="Rating" />
                 <MiniStat value={String(CURRENT_USER.reviews)} label="Reviews" />
@@ -163,7 +206,7 @@ export function Profile() {
               <div className="px-4 md:px-0 grid grid-cols-3 gap-2.5">
                 <QuickStat icon={<Heart size={17} />} value={saved.length} label="Saved" onClick={() => push({ name: 'saved' })} />
                 <QuickStat icon={<CalendarClock size={17} />} value={REQUESTS.length} label="Requests" onClick={() => setPanel('requests')} />
-                <QuickStat icon={<MessageCircle size={17} />} value={3} label="Chats" onClick={() => push({ name: 'chat', id: 't1' })} />
+                <QuickStat icon={<MessageCircle size={17} />} value={myListings} label="Chats" onClick={() => setTab('inbox')} />
               </div>
               <Group title="Your activity">
                 <MenuRow icon={<CalendarClock size={19} />} label="My requests" sub="Viewings, seats and lab access" onClick={() => setPanel('requests')} />
@@ -250,10 +293,10 @@ export function Profile() {
         </div>
       </Sheet>
 
-      <Sheet open={panel === 'settings'} onClose={close} title="Settings & privacy" footer={<Button full onClick={() => { close(); showToast('Profile updated') }}>Save changes</Button>}>
+      <Sheet open={panel === 'settings'} onClose={close} title="Settings & privacy" footer={<Button full disabled={savingSettings} onClick={handleSaveSettings}>{savingSettings ? 'Saving...' : 'Save changes'}</Button>}>
         <div className="space-y-4">
-          <Field label="Display name"><input className={inputClass} defaultValue={CURRENT_USER.name} /></Field>
-          <Field label="Bio" hint={`${bio.length}/160`}><textarea className={`${inputClass} resize-none`} rows={3} maxLength={160} value={bio} onChange={(e) => setBio(e.target.value)} /></Field>
+          <Field label="Display name"><input className={inputClass} value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} /></Field>
+          <Field label="Bio" hint={`${profileForm.bio.length}/160`}><textarea className={`${inputClass} resize-none`} rows={3} maxLength={160} value={profileForm.bio} onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })} /></Field>
           <Field label="Phone"><input className={inputClass} defaultValue="+234 803 123 4567" /></Field>
           <div className="rounded-2xl border border-line divide-y divide-line">
             <div className="flex items-center gap-3 p-3.5"><div className="flex-1"><p className="text-[14px] font-medium text-ink">Show phone on profile</p><p className="text-[12px] text-ink-500">Others can call you directly</p></div><Toggle label="Show phone" on={privacy.phone} onChange={(v) => setPrivacy({ ...privacy, phone: v })} /></div>

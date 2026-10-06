@@ -56,10 +56,35 @@ export function ProviderOnboarding({ initial }: { initial?: Pillar }) {
     setPhase('submitting')
     try {
       const { default: api } = await import('../lib/axios')
-      const listings = listingsFromFlow(sector, data, false) // send all listings to backend to create
+
+      const uploadFile = async (file: File | string): Promise<string> => {
+        if (file instanceof File) {
+          const fd = new FormData()
+          fd.append('image', file)
+          const res = await api.post('/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+          return res.data.url
+        }
+        return file
+      }
+
+      const uploadedData = { ...data }
+      if (uploadedData.idDoc) uploadedData.idDoc = await uploadFile(uploadedData.idDoc)
+      if (uploadedData.letter) uploadedData.letter = await uploadFile(uploadedData.letter)
+      if (uploadedData.ownershipDoc) uploadedData.ownershipDoc = await uploadFile(uploadedData.ownershipDoc)
+      if (uploadedData.photos) uploadedData.photos = await uploadFile(uploadedData.photos)
+      if (uploadedData.licenceDoc) uploadedData.licenceDoc = await uploadFile(uploadedData.licenceDoc)
+      if (uploadedData.vehicleDoc) uploadedData.vehicleDoc = await uploadFile(uploadedData.vehicleDoc)
+      if (uploadedData.itemPhoto) uploadedData.itemPhoto = await uploadFile(uploadedData.itemPhoto)
+      
+      uploadedData.equipment = await Promise.all(uploadedData.equipment.map(async (e) => ({
+        ...e,
+        photo: e.photo ? await uploadFile(e.photo) : undefined
+      })))
+
+      const listings = listingsFromFlow(sector, uploadedData, false) // send all listings to backend to create
       const res = await api.post('/providers/apply', {
         sector,
-        data,
+        data: uploadedData,
         listings
       })
 
@@ -280,6 +305,7 @@ function StepBody({ id, sector, d, set, show, goto }: { id: StepId; sector: Pill
             <TextField label="Price (₦)" inputMode="numeric" value={d.itemPrice} onChange={(v) => set('itemPrice', v.replace(/[^\d,]/g, ''))} placeholder="8,500" />
             <SelectField label="Condition" value={d.itemCondition} onChange={(v) => set('itemCondition', v)} options={['New', 'Used, like new', 'Used, good', 'Used, fair', 'Service']} />
           </div>
+          <UploadField label="Item photo" accept="image/*" value={d.itemPhoto} onChange={(v) => set('itemPhoto', v)} />
         </>
       )
 
@@ -306,6 +332,7 @@ function StepBody({ id, sector, d, set, show, goto }: { id: StepId; sector: Pill
                 <TextField label="Rate (₦)" inputMode="numeric" value={e.rate} onChange={(v) => up({ rate: v.replace(/[^\d,]/g, '') })} placeholder="1,500" />
                 <SelectField label="Charged" value={e.unit} onChange={(v) => up({ unit: v })} options={['per hour', 'per day', 'per use']} />
               </div>
+              <UploadField label="Equipment photo" accept="image/*" value={e.photo || ''} onChange={(v) => up({ photo: v })} />
               <Check2 checked={e.training} onChange={(v) => up({ training: v })}>First-time users need training</Check2>
             </>
           )}
@@ -419,8 +446,8 @@ function Notice({ children }: { children: React.ReactNode }) {
 function Review({ sector, d, set, goto, show }: { sector: Pillar; d: FlowData; set: Setter; goto: (s: StepId) => void; show: boolean; infoChecks: string[] }) {
   const naira = (v: string) => `₦${Number(v.replace(/\D/g, '')).toLocaleString('en-NG')}`
   const groups = useMemo(() => {
-    const id: [string, string][] = [['Role', d.who], ['Name', d.name], ['Phone', d.phone], ...(needsMatric(d, sector) ? [['Matric number', d.matric] as [string, string]] : []), ...(needsStaffId(d) ? [['Staff ID', d.staffId] as [string, string]] : [])]
-    const g: { title: string; step: StepId; rows: [string, string][] }[] = [{ title: 'You', step: 'identity', rows: id }]
+    const id: [string, string | File][] = [['Role', d.who], ['Name', d.name], ['Phone', d.phone], ...(needsMatric(d, sector) ? [['Matric number', d.matric] as [string, string]] : []), ...(needsStaffId(d) ? [['Staff ID', d.staffId] as [string, string]] : [])]
+    const g: { title: string; step: StepId; rows: [string, string | File][] }[] = [{ title: 'You', step: 'identity', rows: id }]
     if (sector === 'market') g.push(
       { title: 'Store', step: 'offer', rows: [['Name', d.storeName], ['Offers', d.offerTypes.join(', ')], ['Area', d.area], ['Hand-over', d.handover.join(', ')]] },
       { title: 'First listing', step: 'first', rows: [['Item', d.itemTitle], ['Category', d.itemCategory], ['Price', naira(d.itemPrice)]] },
@@ -453,7 +480,7 @@ function Review({ sector, d, set, goto, show }: { sector: Pillar; d: FlowData; s
           </div>
           <dl className="space-y-1.5">
             {g.rows.map(([k, v]) => (
-              <div key={k + v} className="flex items-baseline justify-between gap-4 text-[14px]"><dt className="shrink-0 text-ink-500">{k}</dt><dd className="min-w-0 break-words text-right font-medium">{v || '-'}</dd></div>
+              <div key={k + (v instanceof File ? v.name : String(v))} className="flex items-baseline justify-between gap-4 text-[14px]"><dt className="shrink-0 text-ink-500">{k}</dt><dd className="min-w-0 break-words text-right font-medium">{v instanceof File ? v.name : v || '-'}</dd></div>
             ))}
           </dl>
         </section>

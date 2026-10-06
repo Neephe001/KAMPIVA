@@ -234,3 +234,14 @@ export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boo
     </button>
   )
 }
+
+export function AlertModal({ message, open, onClose, title = "Notice" }: { message: string; open: boolean; onClose: () => void; title?: string }) {
+  return (
+    <Sheet open={open} onClose={onClose} title={title}>
+      <p className="text-[14.5px] leading-relaxed text-ink-700">{message}</p>
+      <div className="mt-6">
+        <Button full onClick={onClose}>OK</Button>
+      </div>
+    </Sheet>
+  )
+}

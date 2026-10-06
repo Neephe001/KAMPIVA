@@ -51,23 +51,23 @@ export function ReportFlow({
 
   const evidence = useMemo(() => [sourceLabel, ...autoEvidence], [sourceLabel, autoEvidence])
 
-  const readFileAsDataUrl = (file: File) => new Promise<ReportAttachment>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve({
-      id: `${file.name}-${file.lastModified}-${Math.random().toString(36).slice(2, 9)}`,
-      name: file.name,
-      type: file.type || 'application/octet-stream',
-      size: file.size,
-      dataUrl: typeof reader.result === 'string' ? reader.result : '',
-    })
-    reader.onerror = () => reject(new Error(`Could not read ${file.name}`))
-    reader.readAsDataURL(file)
-  })
-
   const handleFiles = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? [])
     if (!files.length) return
-    const next = await Promise.all(files.map(readFileAsDataUrl))
+    const { default: api } = await import('../lib/axios')
+
+    const next = await Promise.all(files.map(async (file) => {
+      const fd = new FormData()
+      fd.append('image', file)
+      const res = await api.post('/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      return {
+        id: `${file.name}-${file.lastModified}-${Math.random().toString(36).slice(2, 9)}`,
+        name: file.name,
+        type: file.type || 'application/octet-stream',
+        size: file.size,
+        dataUrl: res.data.url,
+      }
+    }))
     setAttachments((current) => [...current, ...next])
     event.target.value = ''
   }

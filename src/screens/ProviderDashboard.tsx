@@ -1,15 +1,16 @@
-import { useState } from 'react'
-import { Eye, MessageCircle, TrendingUp, Plus, MoreHorizontal, Sparkles, Clock, Check, Trash2, Pause, Play, ArrowRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Eye, MessageCircle, TrendingUp, Plus, MoreHorizontal, Sparkles, Clock, Check, Trash2, Pause, Play, ArrowRight, Edit3 } from 'lucide-react'
 import { BackHeader, StackScroll } from '../components/Chrome'
 import { Button, Sheet, Toast, useToast } from '../components/ui'
 import { Img } from '../site/shared'
-import { userListings, formatNaira } from '../lib/data'
+import { userListings, formatNaira, fetchMyListings } from '../lib/data'
 import { useNav } from '../lib/nav'
 import { SECTORS } from '../lib/providers'
 import type { Listing } from '../lib/types'
 
 export function ProviderDashboard() {
   const { push, sectors, setSector, becomeProvider } = useNav()
+  useEffect(() => { fetchMyListings() }, [])
   const mine = userListings.use()
   const items = mine
   const [menu, setMenu] = useState<Listing | null>(null)
@@ -123,12 +124,26 @@ export function ProviderDashboard() {
       <Sheet open={!!menu} onClose={() => setMenu(null)} title={menu?.title}>
         {menu && (
           <div className="space-y-2">
+            <button onClick={() => { setMenu(null); push({ name: 'editListing', id: menu.id }) }} className="flex w-full items-center gap-3 rounded-xl border border-line p-3.5 text-left text-[14.5px] font-medium transition hover:bg-sand">
+              <Edit3 size={18} /> Edit listing
+            </button>
             {!menu.draft && (
               <button onClick={() => { setPaused((p) => (p.includes(menu.id) ? p.filter((x) => x !== menu.id) : [...p, menu.id])); showToast(paused.includes(menu.id) ? 'Listing resumed' : 'Listing paused'); setMenu(null) }} className="flex w-full items-center gap-3 rounded-xl border border-line p-3.5 text-left text-[14.5px] font-medium transition hover:bg-sand">
                 {paused.includes(menu.id) ? <Play size={18} /> : <Pause size={18} />} {paused.includes(menu.id) ? 'Resume listing' : 'Pause listing'}
               </button>
             )}
-            <button onClick={() => { userListings.set((p) => p.filter((x) => x.id !== menu.id)); setMenu(null); showToast('Listing deleted') }} className="flex w-full items-center gap-3 rounded-xl border border-line p-3.5 text-left text-[14.5px] font-medium text-alert transition hover:bg-alert-50">
+            <button onClick={async () => {
+              try {
+                const { default: api } = await import('../lib/axios')
+                await api.delete(`/listings/${menu.id}`)
+                userListings.set((p) => p.filter((x) => x.id !== menu.id))
+                setMenu(null)
+                showToast('Listing deleted')
+              } catch (err) {
+                console.error(err)
+                showToast('Failed to delete listing')
+              }
+            }} className="flex w-full items-center gap-3 rounded-xl border border-line p-3.5 text-left text-[14.5px] font-medium text-alert transition hover:bg-alert-50">
               <Trash2 size={18} /> Delete listing
             </button>
           </div>

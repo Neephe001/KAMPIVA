@@ -33,7 +33,7 @@ export type Pillar = {
   items: Listing[]
 }
 
-import { PEOPLE } from '../lib/data'
+
 import type { Listing as AppListing } from '../lib/types'
 
 const LISTINGS: AppListing[] = [
@@ -123,8 +123,8 @@ const displayPrice = (listing: AppListing) => {
   return match ? Number(match[0].replace(/,/g, '')) : 0
 }
 
-const sellerName = (listing: AppListing) => PEOPLE[listing.sellerId]?.name ?? 'Verified seller'
-const sellerMeta = (listing: AppListing) => PEOPLE[listing.sellerId]?.faculty ?? PEOPLE[listing.sellerId]?.level ?? 'Verified campus seller'
+const sellerName = (listing: AppListing) => 'Verified seller'
+const sellerMeta = (listing: AppListing) => 'Verified campus seller'
 
 const factRows = (listing: AppListing): [string, string][] => {
   const rows: [string, string][] = []

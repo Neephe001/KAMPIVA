@@ -10,7 +10,7 @@
 import { useState } from 'react'
 import {
   CheckCircle2, XCircle, AlertTriangle, CreditCard, Clock, Receipt,
-  ChevronRight, Star, Flag,
+  ChevronRight, Star, Flag, Loader2,
 } from 'lucide-react'
 import { BackHeader, StackScroll } from '../components/Chrome'
 import { Button, Sheet, Toast, useToast } from '../components/ui'
@@ -31,6 +31,7 @@ import {
 } from '../lib/orders'
 import type { Order, OrderStatus, PaymentDetails } from '../lib/types'
 import { ReportFlow } from '../components/ReportFlow'
+import { addReview } from '../lib/reviews'
 
 const ME = 'u-me'
 
@@ -161,6 +162,8 @@ export function OrderDetail({ id }: { id: string }) {
   const [toast, showToast] = useToast()
   const [sheet, setSheet] = useState<'cancel' | 'dispute' | 'payment' | 'receipt' | 'review' | null>(null)
   const [reportOpen, setReportOpen] = useState(false)
+  const [receiptFile, setReceiptFile] = useState<{ url: string, name: string } | null>(null)
+  const [uploadingReceipt, setUploadingReceipt] = useState(false)
 
   // Payment details sheet state (provider enters bank details)
   const [bank, setBank] = useState('')
@@ -206,12 +209,30 @@ export function OrderDetail({ id }: { id: string }) {
     setSheet(null)
   }
 
+  const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    setUploadingReceipt(true)
+    try {
+      const { default: api } = await import('../lib/axios')
+      const fd = new FormData()
+      fd.append('image', file)
+      const res = await api.post('/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      setReceiptFile({ url: res.data.url, name: file.name })
+    } catch (err) {
+      showToast('Failed to upload receipt')
+    } finally {
+      setUploadingReceipt(false)
+    }
+  }
+
   const handleReceiptSubmit = () => {
-    // TODO (Appendix D – file upload): replace with real file upload when storage is available
-    attachReceipt(id, 'receipt-placeholder.jpg')
+    attachReceipt(id, receiptFile?.url || '')
     advanceOrder(id, 'marked_paid', 'buyer', 'Payment receipt uploaded.')
     showToast('Payment marked. Waiting for provider to confirm.')
     setSheet(null)
+    setReceiptFile(null)
   }
 
   const StatusIcon = STATUS_ICON[order.status]
@@ -370,15 +391,30 @@ export function OrderDetail({ id }: { id: string }) {
       </Sheet>
 
       {/* Receipt sheet (buyer marks payment and uploads proof) */}
-      <Sheet open={sheet === 'receipt'} onClose={() => setSheet(null)} title="Mark payment sent" footer={
-        <Button full color={pillar.color} onClick={handleReceiptSubmit}>Confirm payment sent</Button>
+      <Sheet open={sheet === 'receipt'} onClose={() => { setSheet(null); setReceiptFile(null) }} title="Mark payment sent" footer={
+        <Button full color={pillar.color} disabled={uploadingReceipt} onClick={handleReceiptSubmit}>Confirm payment sent</Button>
       }>
         <p className="text-[13.5px] text-ink-700 mb-3">Confirm you have sent payment to the account details above.</p>
-        {/* TODO (Appendix D – file upload): replace stub with real file upload when storage is available */}
-        <div className="rounded-xl border-2 border-dashed border-line p-6 text-center">
-          <Receipt size={24} className="mx-auto text-ink-400 mb-2" />
-          <p className="text-[13px] text-ink-500">Tap to attach a payment receipt (optional)</p>
-        </div>
+        <label className="block cursor-pointer rounded-xl border-2 border-dashed border-line p-6 text-center hover:bg-soft transition group">
+          <input type="file" className="hidden" accept="image/*,.pdf" onChange={handleReceiptUpload} disabled={uploadingReceipt} />
+          {uploadingReceipt ? (
+            <>
+              <Loader2 size={24} className="mx-auto text-olive-600 mb-2 animate-spin" />
+              <p className="text-[13px] text-ink-500">Uploading receipt...</p>
+            </>
+          ) : receiptFile ? (
+            <>
+              <CheckCircle2 size={24} className="mx-auto text-lime-600 mb-2" />
+              <p className="text-[13px] text-ink-700 font-medium">{receiptFile.name}</p>
+              <p className="text-[11px] text-ink-400 mt-1">Tap to change</p>
+            </>
+          ) : (
+            <>
+              <Receipt size={24} className="mx-auto text-ink-400 mb-2 group-hover:text-ink-600 transition" />
+              <p className="text-[13px] text-ink-500 group-hover:text-ink-700 transition">Tap to attach a payment receipt (optional)</p>
+            </>
+          )}
+        </label>
       </Sheet>
 
       {/* Review sheet */}
@@ -386,10 +422,20 @@ export function OrderDetail({ id }: { id: string }) {
         open={sheet === 'review'}
         onClose={() => setSheet(null)}
         onSubmit={(rating, body) => {
-          markReviewed(id, actor)
-          showToast(`Review submitted (${rating} ★)`)
-          setSheet(null)
-          void body // will be stored when backend exists
+          addReview({
+            pillar: order.pillar,
+            subject: order.listingTitle,
+            rating,
+            body,
+            revieweeId: actor === 'buyer' ? order.sellerId : order.buyerId,
+            orderId: order.id,
+          }).then(() => {
+            markReviewed(id, actor)
+            showToast(`Review submitted (${rating} ★)`)
+            setSheet(null)
+          }).catch(() => {
+            showToast('Failed to submit review')
+          })
         }}
       />
 

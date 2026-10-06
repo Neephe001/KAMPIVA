@@ -2,13 +2,57 @@ import { MessageCircle, Shield, Clock, CalendarDays, Star } from 'lucide-react'
 import { BackHeader, StackScroll } from '../components/Chrome'
 import { Avatar, Button, Stars, VerifiedBadge } from '../components/ui'
 import { ListingCard } from '../components/ListingCard'
-import { getPerson, useAllListings, PILLARS } from '../lib/data'
+import { getPerson, useAllListings, PILLARS, CURRENT_USER } from '../lib/data'
 import { useNav } from '../lib/nav'
+import { useState, useEffect } from 'react'
+import type { Person } from '../lib/types'
 
 export function SellerProfile({ id }: { id: string }) {
   const { push } = useNav()
-  const person = getPerson(id)
+  const [person, setPerson] = useState<Person | null>(null)
   const listings = useAllListings().filter((l) => l.sellerId === id)
+
+  useEffect(() => {
+    let active = true
+    if (id === CURRENT_USER.id) {
+      setPerson(CURRENT_USER)
+      return
+    }
+    
+    // First, try dummy data to have something immediate if available
+    const dummy = getPerson(id)
+    if (dummy !== CURRENT_USER) setPerson(dummy)
+    
+    // Then fetch from API
+    import('../lib/axios').then(({ default: api }) => {
+      api.get(`/users/${id}`).then((res) => {
+        if (!active) return
+        const u = res.data.user
+        if (u) {
+          const first = u.name.split(' ')[0]
+          const last = u.name.split(' ').slice(1).join(' ')
+          setPerson({
+            id: u._id,
+            name: u.name,
+            initials: `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase(),
+            verified: u.isVerified ?? true,
+            level: u.campusStatus === 'staff' ? 'Staff' : 'Student',
+            faculty: u.faculty || u.department || 'Kampiva Member',
+            bio: u.bio,
+            rating: u.rating || undefined,
+            reviews: u.reviewsCount || 0,
+            avatar: u.avatarUrl,
+            memberSince: u.createdAt ? new Date(u.createdAt).toLocaleDateString([], { month: 'short', year: 'numeric' }) : undefined
+          })
+        }
+      }).catch(err => console.error('Failed to fetch user profile', err))
+    })
+    
+    return () => { active = false }
+  }, [id])
+
+  if (!person) return null
+
   const pillar = PILLARS.find((p) => p.id === (person.providerPillars?.[0] ?? 'market'))!
 
   return (
@@ -56,7 +100,7 @@ export function SellerProfile({ id }: { id: string }) {
       </StackScroll>
 
       <div className="absolute bottom-0 inset-x-0 z-30 bg-white border-t border-line px-4 py-3">
-        <Button full size="lg" color={pillar.color} onClick={() => push({ name: 'chat', id: person.id })}>
+        <Button full size="lg" color={pillar.color} onClick={() => push({ name: 'chat', id: person.id, listingId: listings[0]?.id })}>
           <MessageCircle size={18} /> Message {person.name.split(' ')[0]}
         </Button>
       </div>

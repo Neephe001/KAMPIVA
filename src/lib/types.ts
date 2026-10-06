@@ -62,6 +62,7 @@ export interface Person {
   name: string
   initials: string
   avatar?: string
+  bio?: string
   level?: string
   faculty?: string
   verified: boolean

@@ -39,10 +39,11 @@ export function Choice({
 export function UploadField({
   label, hint, value, onChange, accept = 'image/*,.pdf', multiple = false,
 }: {
-  label: string; hint?: string; value: string; onChange: (name: string) => void; accept?: string; multiple?: boolean
+  label: string; hint?: string; value: string | File; onChange: (file: File | string) => void; accept?: string; multiple?: boolean
 }) {
   const ref = useRef<HTMLInputElement>(null)
   const id = useId()
+  const displayValue = value instanceof File ? value.name : value?.substring(value.lastIndexOf('/') + 1) || ''
   return (
     <div>
       <span id={id} className="block text-[13px] font-medium text-ink-700 mb-1.5">{label}</span>
@@ -54,7 +55,7 @@ export function UploadField({
         multiple={multiple}
         onChange={(e) => {
           const f = Array.from(e.target.files ?? [])
-          onChange(f.length > 1 ? `${f.length} files selected` : f[0]?.name ?? '')
+          if (f[0]) onChange(f[0])
         }}
       />
       <button
@@ -63,7 +64,7 @@ export function UploadField({
         onClick={() => ref.current?.click()}
         className={`flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed px-3 py-3 text-[14px] font-medium transition active:scale-[0.99] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-lime-400/50 ${value ? 'border-olive-600 bg-olive-50 text-olive-800' : 'border-field/60 bg-paper text-ink-500 hover:border-olive-600'}`}
       >
-        {value ? <><Check size={17} strokeWidth={3} className="shrink-0" /><span className="truncate">{value}</span></> : <><Upload size={17} className="shrink-0" /> Choose a file</>}
+        {value ? <><Check size={17} strokeWidth={3} className="shrink-0" /><span className="truncate">{displayValue}</span></> : <><Upload size={17} className="shrink-0" /> Choose a file</>}
       </button>
       {hint && <span className="mt-1 block text-[12px] text-ink-400">{hint}</span>}
     </div>

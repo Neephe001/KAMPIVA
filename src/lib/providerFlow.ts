@@ -2,21 +2,21 @@ import type { Listing, Pillar } from './types'
 import type { Account } from './session'
 import { isValidMatric } from './session'
 
-export interface Equip { name: string; category: string; rate: string; unit: string; training: boolean }
+export interface Equip { name: string; category: string; rate: string; unit: string; training: boolean; photo?: string | File }
 export interface RouteRow { from: string; to: string; time: string; fare: string; days: string[] }
 
 export interface FlowData {
-  who: string; name: string; phone: string; matric: string; staffId: string; idDoc: string
+  who: string; name: string; phone: string; matric: string; staffId: string; idDoc: string | File
   // market
-  offerTypes: string[]; storeName: string; storeDesc: string; area: string; handover: string[]; itemTitle: string; itemCategory: string; itemPrice: string; itemCondition: string
+  offerTypes: string[]; storeName: string; storeDesc: string; area: string; handover: string[]; itemTitle: string; itemCategory: string; itemPrice: string; itemCondition: string; itemPhoto: string | File
   // research
-  institution: string; department: string; roleTitle: string; letter: string; equipment: Equip[]
+  institution: string; department: string; roleTitle: string; letter: string | File; equipment: Equip[]
   days: string[]; from: string; to: string; maxBooking: string; audience: string[]; approval: boolean; deposit: string
   // stay
-  ownershipDoc: string; propTitle: string; propArea: string; address: string; propType: string; rent: string; rentPer: string; rooms: string; amenities: string[]; photos: string
+  ownershipDoc: string | File; propTitle: string; propArea: string; address: string; propType: string; rent: string; rentPer: string; rooms: string; amenities: string[]; photos: string | File
   inspDays: string[]; inspWindow: string; consent: boolean
   // move
-  licence: string; licenceExpiry: string; licenceDoc: string; bgConsent: boolean; vehicleType: string; plate: string; model: string; seats: string; vehicleDoc: string; routes: RouteRow[]
+  licence: string; licenceExpiry: string; licenceDoc: string | File; bgConsent: boolean; vehicleType: string; plate: string; model: string; seats: string; vehicleDoc: string | File; routes: RouteRow[]
   confirmed: boolean
 }
 
@@ -47,7 +47,7 @@ export const WHO: Record<Pillar, { id: string; title: string; sub: string }[]> =
 
 export const blankFlow = (a: Account | null, fallbackName: string): FlowData => ({
   who: '', name: a ? `${a.first} ${a.last}`.trim() : fallbackName, phone: a?.phone ?? '', matric: a?.matric ?? '', staffId: a?.staffId ?? '', idDoc: '',
-  offerTypes: [], storeName: '', storeDesc: '', area: '', handover: ['Meet on campus'], itemTitle: '', itemCategory: '', itemPrice: '', itemCondition: 'Used, good',
+  offerTypes: [], storeName: '', storeDesc: '', area: '', handover: ['Meet on campus'], itemTitle: '', itemCategory: '', itemPrice: '', itemCondition: 'Used, good', itemPhoto: '',
   institution: 'University of Ilorin', department: '', roleTitle: '', letter: '',
   equipment: [{ name: '', category: '', rate: '', unit: 'per hour', training: false }],
   days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], from: '9:00 AM', to: '4:00 PM', maxBooking: '3 days', audience: ['Students'], approval: true, deposit: '',
@@ -182,13 +182,19 @@ const naira = (v: string) => Number(digits(v))
 
 /** Turns what the provider typed into real listings (drafts until approved). */
 export function listingsFromFlow(sector: Pillar, d: FlowData, draft: boolean): Listing[] {
-  const base = { sellerId: 'u-me', postedAgo: 'Just now', draft, image: IMG[sector], rating: undefined, tags: ['New provider'] }
+  let image = IMG[sector]
+  if (sector === 'stay' && d.photos) {
+    if (typeof d.photos === 'string') image = d.photos
+    else if (Array.isArray(d.photos) && d.photos[0] && typeof d.photos[0] === 'string') image = d.photos[0]
+  }
+
+  const base = { sellerId: 'u-me', postedAgo: 'Just now', draft, image, rating: undefined, tags: ['New provider'] }
   const stamp = Date.now()
   if (sector === 'market')
-    return [{ ...base, id: `u-${stamp}`, pillar: 'market', title: d.itemTitle.trim(), category: d.itemCategory, price: naira(d.itemPrice), condition: d.itemCondition, location: d.area || 'Main campus', description: d.storeDesc.trim(), tags: ['Verified seller', ...d.handover] }]
+    return [{ ...base, image: (typeof d.itemPhoto === 'string' && d.itemPhoto) ? d.itemPhoto : image, id: `u-${stamp}`, pillar: 'market', title: d.itemTitle.trim(), category: d.itemCategory, price: naira(d.itemPrice), condition: d.itemCondition, location: d.area || 'Main campus', description: d.storeDesc.trim(), tags: ['Verified seller', ...d.handover] }]
   if (sector === 'research')
     return d.equipment.map((e, i) => ({
-      ...base, id: `u-${stamp}-${i}`, pillar: 'research' as const, title: e.name.trim(), category: e.category, price: naira(e.rate), priceUnit: e.unit,
+      ...base, image: (typeof e.photo === 'string' && e.photo) ? e.photo : image, id: `u-${stamp}-${i}`, pillar: 'research' as const, title: e.name.trim(), category: e.category, price: naira(e.rate), priceUnit: e.unit,
       location: d.department.trim(), availability: 'Available, request access', description: `${e.name.trim()} from ${d.department.trim()}. Available ${d.days.join(', ')}, ${d.from} to ${d.to}. Max booking ${d.maxBooking}.`,
       tags: ['Institutional', ...(e.training ? ['Training required'] : []), ...(d.approval ? ['Approval needed'] : [])],
       spec: [{ label: 'Availability', value: `${d.days.join(', ')}, ${d.from} to ${d.to}` }, { label: 'Max booking', value: d.maxBooking }, { label: 'Who can book', value: d.audience.join(', ') }],

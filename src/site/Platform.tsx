@@ -2,7 +2,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router'
 import { useEffect } from 'react'
 import { Plus, LogOut, ArrowLeft, Search, Bell, Heart, BadgeCheck, HandCoins, LayoutDashboard } from 'lucide-react'
 import { Avatar } from '../components/ui'
-import { CURRENT_USER, NOTIFICATIONS } from '../lib/data'
+import { CURRENT_USER, notifications, chatThreads, fetchMyProfile } from '../lib/data'
 import { BottomNav, TAB_LIST, useTabBadges } from '../components/Chrome'
 import { KampivaLogo, KampivaMark } from './shared'
 import { NavProvider, useNav } from '../lib/nav'
@@ -16,6 +16,7 @@ import { ListingDetail } from '../screens/ListingDetail'
 import { SellerProfile } from '../screens/SellerProfile'
 import { PillarHub } from '../screens/PillarHub'
 import { CreateListing } from '../screens/CreateListing'
+import { EditListing } from '../screens/EditListing'
 import { ProviderOnboarding } from '../screens/ProviderOnboarding'
 import { Chat } from '../screens/Chat'
 import { ProviderDashboard } from '../screens/ProviderDashboard'
@@ -43,6 +44,8 @@ function Shell() {
     if (!alreadyOpen) push({ name: 'listing', id: listingId })
   }, [listingId]) // Only depend on listingId, not stack
 
+  useEffect(() => { fetchMyProfile() }, [])
+
   // Stacked (pushed) screens render above the active tab.
   const top = stack[stack.length - 1]
   if (top) {
@@ -54,13 +57,14 @@ function Shell() {
           {top.name === 'pillar' && <PillarHub id={top.id} />}
           {top.name === 'create' && <CreateListing sector={top.sector} />}
           {top.name === 'provider' && <ProviderOnboarding initial={top.sector} />}
-          {top.name === 'chat' && <Chat id={top.id} />}
+          {top.name === 'chat' && <Chat id={top.id} listingId={top.listingId} />}
           {top.name === 'providerDashboard' && <ProviderDashboard />}
           {top.name === 'reviews' && <Reviews />}
           {top.name === 'saved' && <Saved />}
           {top.name === 'orders' && <Orders />}
           {top.name === 'order' && <OrderDetail id={top.id} />}
           {top.name === 'adminQueue' && <AdminQueues />}
+          {top.name === 'editListing' && <EditListing id={top.id} />}
         </div>
         <BottomNav />
       </>
@@ -96,7 +100,7 @@ function Shell() {
 }
 
 const TITLES = { home: 'Home', search: 'Discover', inbox: 'Inbox', activity: 'Activity', profile: 'Profile' } as const
-const STACK_TITLES = { listing: 'Listing', seller: 'Provider', pillar: 'Explore', chat: 'Chat', create: 'New listing', provider: 'Become a provider', providerDashboard: 'Provider dashboard', reviews: 'Ratings & reviews', saved: 'Saved', orders: 'Orders', order: 'Order detail', adminQueue: 'Admin queues' } as const
+const STACK_TITLES = { listing: 'Listing', seller: 'Provider', pillar: 'Explore', chat: 'Chat', create: 'New listing', provider: 'Become a provider', providerDashboard: 'Provider dashboard', reviews: 'Ratings & reviews', saved: 'Saved', orders: 'Orders', order: 'Order detail', adminQueue: 'Admin queues', editListing: 'Edit listing' } as const
 
 function useLogout() {
   const navigate = useNavigate()
@@ -158,7 +162,8 @@ function Sidebar() {
 
 function TopBar() {
   const { tab, stack, setTab, push, role, isProvider, becomeProvider, sectors } = useNav()
-  const unread = NOTIFICATIONS.filter((n) => n.unread).length
+  const notifs = notifications.use()
+  const unread = notifs.filter((n) => n.unread).length
   const canList = Object.values(sectors).some((s) => s === 'active')
   return (
     <header className="hidden md:flex h-18 shrink-0 items-center gap-3 border-b border-line bg-white/85 px-6 lg:px-8 backdrop-blur">

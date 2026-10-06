@@ -4,21 +4,23 @@
  * §2.6 – Shows the linked order status chip; "Mark as complete" appears
  *         after payment_confirmed and triggers the order state machine.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Send, ShieldCheck, ChevronRight, CreditCard, Receipt, CheckCircle2, Flag } from 'lucide-react'
 import { BackHeader, StackScroll } from '../components/Chrome'
 import { Avatar, VerifiedBadge } from '../components/ui'
-import { THREADS, getPerson, PILLARS } from '../lib/data'
+import { chatThreads, getPerson, PILLARS, CURRENT_USER } from '../lib/data'
 import type { ChatMessage, ChatThread } from '../lib/types'
+import { session } from '../lib/session'
 import { useNav } from '../lib/nav'
 import { ordersStore, advanceOrder, canMarkComplete, STATUS_LABEL } from '../lib/orders'
 import { ReportFlow } from '../components/ReportFlow'
 
 // `id` may be a thread id or, when starting fresh from a listing/profile, a person id.
 function resolveThread(id: string): ChatThread {
-  const byThread = THREADS.find((t) => t.id === id)
+  const threads = chatThreads.get()
+  const byThread = threads.find((t) => t.id === id)
   if (byThread) return byThread
-  const byPerson = THREADS.find((t) => t.personId === id)
+  const byPerson = threads.find((t) => t.personId === id)
   if (byPerson) return byPerson
   const person = getPerson(id)
   return {
@@ -129,14 +131,40 @@ function renderMessage(msg: ChatMessage, color: string, personInitials: string, 
 }
 
 // ─── Main component ─────────────────────────────────────────────────────────
-export function Chat({ id, embedded = false }: { id: string; embedded?: boolean }) {
+export function Chat({ id, listingId, embedded = false }: { id: string; listingId?: string; embedded?: boolean }) {
   const { push } = useNav()
   const thread = resolveThread(id)
   const person = getPerson(thread.personId)
+  const personName = thread.personName || person.name
   const pillar = PILLARS.find((p) => p.id === thread.pillar)!
-  const [messages, setMessages] = useState<ChatMessage[]>(thread.messages)
+  const [messages, setMessages] = useState<ChatMessage[]>(thread.messages || [])
   const [draft, setDraft] = useState('')
   const [reportOpen, setReportOpen] = useState(false)
+
+  useEffect(() => {
+    if (!thread.id.startsWith('new-')) {
+      const load = async () => {
+        try {
+          console.log('Fetching messages for thread:', thread.id)
+          const { default: api } = await import('../lib/axios')
+          const res = await api.get(`/chat/${thread.id}/messages`)
+          console.log('Received messages:', res.data.messages)
+          const msgs = res.data.messages.map((m: any) => ({
+            id: m._id,
+            fromMe: m.senderId !== thread.personId,
+            type: m.type,
+            text: m.text,
+            time: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }))
+          setMessages(msgs)
+          await api.put(`/chat/${thread.id}/read`)
+        } catch (err) {
+          console.error(err)
+        }
+      }
+      load()
+    }
+  }, [thread.id])
 
   // §2.6 – linked order (if any)
   const orders = ordersStore.use()
@@ -144,11 +172,32 @@ export function Chat({ id, embedded = false }: { id: string; embedded?: boolean 
   const actor = order ? (order.buyerId === 'u-me' ? 'buyer' : 'provider') : null
   const showComplete = order && actor ? canMarkComplete(order, actor) : false
 
-  const send = () => {
+  const send = async () => {
     if (!draft.trim()) return
-    const msg: ChatMessage = { id: 'x' + messages.length, fromMe: true, type: 'text', text: draft.trim(), time: 'now' }
-    setMessages((m) => [...m, msg])
+    const txt = draft.trim()
     setDraft('')
+    
+    // Optimistic
+    const msg: ChatMessage = { id: 'x' + Date.now(), fromMe: true, type: 'text', text: txt, time: 'now' }
+    setMessages((m) => [...m, msg])
+
+    try {
+      const { default: api } = await import('../lib/axios')
+      let tid = thread.id
+      if (tid.startsWith('new-')) {
+        // Create the thread first
+        if (!listingId) {
+          console.error("No listingId provided for new thread");
+          return;
+        }
+        const res = await api.post('/chat', { listingId });
+        tid = res.data.thread._id;
+        // Optionally update the nav stack so we are now on the real thread id, but for now we just use the new tid
+      }
+      await api.post(`/chat/${tid}/messages`, { text: txt, type: 'text' })
+    } catch (err) {
+      console.error('Failed to send', err)
+    }
   }
 
   const handleMarkComplete = () => {
@@ -169,7 +218,7 @@ export function Chat({ id, embedded = false }: { id: string; embedded?: boolean 
     <>
       <BackHeader
         hideBack={embedded}
-        title={person.name}
+        title={personName}
         right={
           <div className="flex items-center gap-2 pr-1">
             <button onClick={() => setReportOpen(true)} className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-1 text-[11px] font-semibold text-ink-600 hover:bg-soft">

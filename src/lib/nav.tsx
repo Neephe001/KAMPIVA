@@ -7,7 +7,7 @@ export type Screen =
   | { name: 'listing'; id: string }
   | { name: 'seller'; id: string }
   | { name: 'pillar'; id: string } // pillar hub (research/stay/move)
-  | { name: 'chat'; id: string }
+  | { name: 'chat'; id: string; listingId?: string }
   | { name: 'create'; sector?: Pillar }
   | { name: 'provider'; sector?: Pillar } // provider onboarding: pick a service, then its own flow
   | { name: 'providerDashboard' }
@@ -15,6 +15,7 @@ export type Screen =
   | { name: 'saved' }
   | { name: 'orders' }                    // §2.6 – order list
   | { name: 'order'; id: string }         // §2.6 – order detail
+  | { name: 'editListing'; id: string }
   | { name: 'adminQueue' }               // §4 – verification and report queues
 
 export type Tab = 'home' | 'search' | 'inbox' | 'activity' | 'profile'

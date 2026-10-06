@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { ChevronLeft, Home, Search, MessageCircle, Bell, User } from 'lucide-react'
 import { useNav, type Tab } from '../lib/nav'
-import { NOTIFICATIONS, THREADS } from '../lib/data'
+import { notifications, chatThreads } from '../lib/data'
 
 /** Scrollable content region sized to sit under the status bar and above the tab bar. */
 export function ScreenScroll({ children, pad = true }: { children: ReactNode; pad?: boolean }) {
@@ -59,15 +59,19 @@ const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
 export const TAB_LIST = TABS
 
 export function useTabBadges() {
-  const unreadMsgs = THREADS.reduce((n, t) => n + t.unread, 0)
-  const unreadNotif = NOTIFICATIONS.filter((n) => n.unread).length
+  const threads = chatThreads.use()
+  const notifs = notifications.use()
+  const unreadMsgs = threads.reduce((n, t) => n + t.unread, 0)
+  const unreadNotif = notifs.filter((n) => n.unread).length
   return (id: Tab) => (id === 'inbox' ? unreadMsgs : id === 'activity' ? unreadNotif : 0)
 }
 
 export function BottomNav() {
   const { tab, setTab } = useNav()
-  const unreadMsgs = THREADS.reduce((n, t) => n + t.unread, 0)
-  const unreadNotif = NOTIFICATIONS.filter((n) => n.unread).length
+  const threads = chatThreads.use()
+  const notifs = notifications.use()
+  const unreadMsgs = threads.reduce((n, t) => n + t.unread, 0)
+  const unreadNotif = notifs.filter((n) => n.unread).length
   return (
     <nav aria-label="Main" className="absolute bottom-0 inset-x-0 z-40 h-19 md:hidden bg-white border-t border-line px-2 pt-1.5 flex items-start justify-around">
       {TABS.map(({ id, label, icon: Icon }) => {

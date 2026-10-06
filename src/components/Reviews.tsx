@@ -46,7 +46,7 @@ export function WriteReview({ open, onClose, onDone, defaultPillar }: { open: bo
     <Sheet
       open={open} onClose={onClose} title="Write a review" wide
       footer={<Button full size="lg" disabled={!ok} onClick={() => {
-        addReview({ pillar, about: about.trim(), subject: subject.trim() || SECTORS.find((s) => s.id === pillar)!.full, author: CURRENT_USER.name.split(' ').map((w, i) => (i ? w[0] + '.' : w)).join(' '), level: CURRENT_USER.level ?? 'Member', rating, body: body.trim() })
+        addReview({ pillar, aboutName: about.trim(), subject: subject.trim() || SECTORS.find((s) => s.id === pillar)!.full, rating, body: body.trim() })
         setAbout(''); setSubject(''); setRating(0); setBody(''); onDone()
       }}>Post review</Button>}
     >

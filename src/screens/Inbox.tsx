@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MessageCircle, Search, ShieldCheck } from 'lucide-react'
 import { ScreenScroll } from '../components/Chrome'
 import { Avatar } from '../components/ui'
-import { THREADS, getPerson, PILLARS } from '../lib/data'
+import { chatThreads, fetchThreads, getPerson, PILLARS } from '../lib/data'
 import { useNav } from '../lib/nav'
 import type { Pillar } from '../lib/types'
 import { Chat } from './Chat'
@@ -12,11 +12,12 @@ export function Inbox() {
   const { push } = useNav()
   const [q, setQ] = useState('')
   const [scope, setScope] = useState<'all' | 'unread' | Pillar>('all')
-  const [active, setActive] = useState(THREADS[0]?.id)
+  useEffect(() => { fetchThreads() }, [])
+  const allThreads = chatThreads.use()
+  const [active, setActive] = useState(allThreads[0]?.id)
 
-  const threads = THREADS.filter((t) => {
-    const p = getPerson(t.personId)
-    const hit = !q || `${p.name} ${t.listingTitle ?? ''} ${t.lastMessage}`.toLowerCase().includes(q.toLowerCase())
+  const threads = allThreads.filter((t) => {
+    const hit = !q || `${t.personName} ${t.listingTitle ?? ''} ${t.lastMessage}`.toLowerCase().includes(q.toLowerCase())
     const inScope = scope === 'all' || (scope === 'unread' ? t.unread > 0 : t.pillar === scope)
     return hit && inScope
   })
@@ -50,9 +51,9 @@ export function Inbox() {
 
       <div className="divide-y divide-line border-t border-line">
         {threads.map((t) => {
-          const person = getPerson(t.personId)
           const pillar = PILLARS.find((p) => p.id === t.pillar)!
           const selected = active === t.id
+          const initials = t.personName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'U'
           return (
             <button
               key={t.id}
@@ -61,12 +62,12 @@ export function Inbox() {
             >
               {selected && <span className="hidden lg:block absolute left-0 inset-y-2 w-[3px] rounded-r-full bg-olive-700" />}
               <div className="relative">
-                <Avatar initials={person.initials} size={48} color={pillar.color} institutional={person.institutional} />
+                <Avatar initials={initials} size={48} color={pillar.color} />
                 <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white" style={{ background: pillar.color }} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <p className={`text-[14.5px] text-ink truncate ${t.unread ? 'font-bold' : 'font-semibold'}`}>{person.name}</p>
+                  <p className={`text-[14.5px] text-ink truncate ${t.unread ? 'font-bold' : 'font-semibold'}`}>{t.personName}</p>
                   <span className={`text-[11.5px] shrink-0 ${t.unread ? 'text-olive-700 font-semibold' : 'text-ink-400'}`}>{t.lastTime}</span>
                 </div>
                 <p className="text-[12px] font-medium mt-0.5 truncate" style={{ color: pillar.color }}>{pillar.name} · {t.listingTitle}</p>

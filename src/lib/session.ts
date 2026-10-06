@@ -19,6 +19,11 @@ export interface Account {
   staffId?: string
   kind: 'member' | 'provider'
   sectors: Sector[]
+  bio?: string
+  rating?: number
+  reviewsCount?: number
+  avatarUrl?: string
+  joinedAt?: string
 }
 
 /** What the visitor was trying to do before being asked to sign in. */
