@@ -101,7 +101,7 @@ function Footer({ go }: { go: Go }) {
       <div className="mx-auto max-w-300 px-6 lg:px-10 py-16 grid md:grid-cols-[1.5fr_repeat(3,1fr)] gap-10">
         <div>
           <KampivaLogo className="h-13.5" />
-          <p className="mt-4 max-w-xs text-[14px] text-ink-500 leading-relaxed">Buy, borrow, find a room and share rides with verified students. Made in Ilorin.</p>
+          <p className="mt-4 max-w-xs text-[14px] text-ink-500 leading-relaxed">Buy, borrow, find a room and share rides with verified students. Made for Unilorin.</p>
         </div>
         {cols.map((c) => (
           <div key={c.h}>
