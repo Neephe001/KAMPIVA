@@ -89,7 +89,7 @@ export function Home() {
           <div className="relative">
             <VerifiedBadge label="KampivaID Active" size="md" />
             <p className="font-display font-semibold text-[16px] md:text-[22px] mt-2.5 leading-snug">
-              One Verified Campus.<br />Every Everyday Journey.
+              One Verified Campus.<br />Everyday Journey.
             </p>
             <p className="text-[12.5px] text-white/80 mt-1">
               The unified operating system for campus life.
