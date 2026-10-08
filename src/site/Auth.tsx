@@ -221,7 +221,8 @@ export function Login({ go }: { go: Go }) {
       phone: '',
       campusStatus: 'other',
       kind: 'member',
-      sectors: []
+      sectors: [],
+      joinedAt: res.data.user.createdAt
     })
     
     landAfterAuth(navigate)

@@ -109,7 +109,7 @@ export function Profile() {
               <div className="mt-4 grid grid-cols-3 rounded-2xl bg-soft">
                 <MiniStat value={CURRENT_USER.rating ? CURRENT_USER.rating.toFixed(1) : 'New'} label="Rating" />
                 <MiniStat value={String(CURRENT_USER.reviews)} label="Reviews" />
-                <MiniStat value={(CURRENT_USER.memberSince ?? 'Oct 2026').split(' ')[1]} label="Since" />
+                <MiniStat value={(CURRENT_USER.memberSince ?? '2026').match(/\d{4}/)?.[0] ?? new Date().getFullYear().toString()} label="Since" />
               </div>
               <div className="mt-4 flex gap-2">
                 <Button full variant="outline" size="sm" onClick={() => setPanel('settings')}><Pencil size={14} /> Edit profile</Button>
