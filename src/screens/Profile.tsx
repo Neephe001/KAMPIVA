@@ -31,7 +31,7 @@ export function Profile() {
   const navigate = useNavigate()
   const providerMode = isProvider && role === 'provider'
   useEffect(() => { fetchMyListings() }, [])
-  const myListings = userListings.use().filter((l) => !l.draft).length
+  const myListings = (userListings.use() || []).filter((l) => !l.draft).length
   const [panel, setPanel] = useState<Panel>(null)
   const [helpTopic, setHelpTopic] = useState<'faq' | 'help' | 'safety' | null>(null)
   const [reportOpen, setReportOpen] = useState(false)

@@ -45,7 +45,7 @@ export function Activity() {
   const { push } = useNav()
   
   // Use API-backed store
-  const allList = notifications.use()
+  const allList = notifications.use() || []
   useEffect(() => { fetchNotifications() }, [])
 
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
@@ -55,7 +55,7 @@ export function Activity() {
   const list = allList.filter((n) => filter === 'all' || n.unread)
 
   // §2.6 – live order count for the Orders shortcut
-  const orders = ordersStore.use()
+  const orders = ordersStore.use() || []
   const activeOrders = orders.filter((o) => ['enquiry','requested','accepted','marked_paid','payment_confirmed','in_progress'].includes(o.status) && (o.buyerId === 'u-me' || o.providerId === 'u-me'))
 
   const select = (n: AppNotification) => {

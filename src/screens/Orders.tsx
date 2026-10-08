@@ -72,7 +72,7 @@ const ACTIVE_STATUSES: OrderStatus[] = ['enquiry', 'requested', 'accepted', 'mar
 const PAST_STATUSES: OrderStatus[]   = ['completed', 'cancelled', 'disputed']
 
 export function Orders() {
-  const orders = ordersStore.use()
+  const orders = ordersStore.use() || []
   const mine = orders.filter((o) => o.buyerId === ME || o.providerId === ME)
   const active = mine.filter((o) => ACTIVE_STATUSES.includes(o.status))
   const past   = mine.filter((o) => PAST_STATUSES.includes(o.status))

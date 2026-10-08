@@ -13,7 +13,7 @@ export function Inbox() {
   const [q, setQ] = useState('')
   const [scope, setScope] = useState<'all' | 'unread' | Pillar>('all')
   useEffect(() => { fetchThreads() }, [])
-  const allThreads = chatThreads.use()
+  const allThreads = chatThreads.use() || []
   const [active, setActive] = useState(allThreads[0]?.id)
 
   const threads = allThreads.filter((t) => {

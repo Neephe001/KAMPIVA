@@ -115,14 +115,17 @@ export function useUser() {
 /** Small persisted store hook for app state (saved items, provider sectors, listings...). */
 export function persisted<T>(key: string, fallback: T) {
   let cache: T = read<T>(key) ?? fallback
+  // Ensure cache is never undefined/null if fallback is an array
+  if (cache === null || cache === undefined) cache = fallback
   const subs = new Set<() => void>()
   return {
     get: () => cache,
     set(next: T | ((p: T) => T)) {
-      cache = typeof next === 'function' ? (next as (p: T) => T)(cache) : next
+      const nextVal = typeof next === 'function' ? (next as (p: T) => T)(cache) : next
+      cache = (nextVal === null || nextVal === undefined) ? fallback : nextVal
       write(key, cache)
       subs.forEach((s) => s())
     },
-    use: () => useSyncExternalStore((cb) => { subs.add(cb); return () => subs.delete(cb) }, () => cache, () => cache),
+    use: () => useSyncExternalStore((cb) => { subs.add(cb); return () => subs.delete(cb) }, () => cache ?? fallback, () => fallback),
   }
 }

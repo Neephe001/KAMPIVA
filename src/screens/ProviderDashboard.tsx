@@ -11,7 +11,7 @@ import type { Listing } from '../lib/types'
 export function ProviderDashboard() {
   const { push, sectors, setSector, becomeProvider } = useNav()
   useEffect(() => { fetchMyListings() }, [])
-  const mine = userListings.use()
+  const mine = userListings.use() || []
   const items = mine
   const [menu, setMenu] = useState<Listing | null>(null)
   const [paused, setPaused] = useState<string[]>([])
