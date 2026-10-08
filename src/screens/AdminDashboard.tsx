@@ -109,10 +109,10 @@ function OverviewTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
       </div>
 
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={Users} label="Total users" value={stats?.totalUsers ?? 0} accent="bg-sky-50 text-sky-700" />
-        <StatCard icon={ListChecks} label="All listings" value={stats?.totalListings ?? 0} accent="bg-violet-50 text-violet-700" />
-        <StatCard icon={Clock} label="Pending review" value={stats?.pendingListings ?? 0} accent="bg-amber-50 text-amber-700" urgent={stats?.pendingListings! > 0} />
-        <StatCard icon={UserCheck} label="Admins" value={stats?.totalAdmins ?? 0} accent="bg-olive-50 text-olive-700" />
+        <StatCard icon={Users} label="Total users" value={stats?.totalUsers ?? 0} accent="bg-sky-50 text-sky-700" onClick={() => onNavigate('users')} />
+        <StatCard icon={ListChecks} label="All listings" value={stats?.totalListings ?? 0} accent="bg-violet-50 text-violet-700" onClick={() => onNavigate('listings')} />
+        <StatCard icon={Clock} label="Pending review" value={stats?.pendingListings ?? 0} accent="bg-amber-50 text-amber-700" urgent={stats?.pendingListings! > 0} onClick={() => onNavigate('listings')} />
+        <StatCard icon={UserCheck} label="Admins" value={stats?.totalAdmins ?? 0} accent="bg-olive-50 text-olive-700" onClick={() => onNavigate('users')} />
       </div>
 
       {/* Quick action cards */}
@@ -135,18 +135,18 @@ function OverviewTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
   )
 }
 
-function StatCard({ icon: Icon, label, value, accent, urgent }: {
-  icon: any; label: string; value: number; accent: string; urgent?: boolean
+function StatCard({ icon: Icon, label, value, accent, urgent, onClick }: {
+  icon: any; label: string; value: number; accent: string; urgent?: boolean; onClick?: () => void;
 }) {
   return (
-    <div className={`relative overflow-hidden rounded-2xl border bg-white p-4 shadow-sm transition ${urgent ? 'border-amber-200' : 'border-line'}`}>
+    <button onClick={onClick} className={`text-left w-full relative overflow-hidden rounded-2xl border bg-white p-4 shadow-sm transition hover:bg-soft active:scale-[0.98] ${urgent ? 'border-amber-200' : 'border-line'}`}>
       {urgent && <div className="absolute top-3 right-3 h-2 w-2 rounded-full bg-amber-400 animate-pulse" />}
       <span className={`inline-grid h-9 w-9 place-items-center rounded-xl ${accent}`}>
         <Icon size={18} />
       </span>
       <p className="mt-3 font-display text-[28px] font-semibold tracking-tight text-ink leading-none">{value}</p>
       <p className="mt-1 text-[12px] font-medium text-ink-500">{label}</p>
-    </div>
+    </button>
   )
 }
 
