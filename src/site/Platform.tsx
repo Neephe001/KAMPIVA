@@ -175,7 +175,7 @@ function Sidebar() {
 
 function TopBar() {
   const { tab, stack, setTab, push, role, isProvider, becomeProvider, sectors } = useNav()
-  const notifs = notifications.use()
+  const notifs = notifications.use() || []
   const unread = notifs.filter((n) => n.unread).length
   const canList = Object.values(sectors).some((s) => s === 'active')
   return (

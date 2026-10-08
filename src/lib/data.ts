@@ -234,8 +234,8 @@ export const useAllListings = () => {
     fetchListings()
     fetchMyListings()
   }, [])
-  const mine = userListings.use()
-  const fetched = apiListings.use()
+  const mine = userListings.use() || []
+  const fetched = apiListings.use() || []
   const mineLive = mine.filter((l) => !l.draft)
   const mineIds = new Set(mineLive.map((l) => l.id))
   return [...mineLive, ...fetched.filter((l) => !mineIds.has(l.id))]
@@ -251,8 +251,8 @@ export function listingsByPillar(p: Pillar) {
 
 export const useListing = (id: string) => {
   useEffect(() => { fetchListings() }, [])
-  const mine = userListings.use()
-  const fetched = apiListings.use()
+  const mine = userListings.use() || []
+  const fetched = apiListings.use() || []
   const [extra, setExtra] = useState<Listing | null>(null)
   
   const local = mine.find((l) => l.id === id) || fetched.find((l) => l.id === id)
