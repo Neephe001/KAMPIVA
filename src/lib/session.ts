@@ -129,3 +129,18 @@ export function persisted<T>(key: string, fallback: T) {
     use: () => useSyncExternalStore((cb) => { subs.add(cb); return () => subs.delete(cb) }, () => cache ?? fallback, () => fallback),
   }
 }
+
+/** Simple memory store hook for state that shouldn't be persisted to localStorage (e.g. API fetched data). */
+export function memoryStore<T>(fallback: T) {
+  let cache: T = fallback;
+  const subs = new Set<() => void>();
+  return {
+    get: () => cache,
+    set(next: T | ((p: T) => T)) {
+      const nextVal = typeof next === 'function' ? (next as (p: T) => T)(cache) : next;
+      cache = (nextVal === null || nextVal === undefined) ? fallback : nextVal;
+      subs.forEach((s) => s());
+    },
+    use: () => useSyncExternalStore((cb) => { subs.add(cb); return () => subs.delete(cb) }, () => cache ?? fallback, () => fallback),
+  }
+}

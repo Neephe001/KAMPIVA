@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Pillar, Person, Listing, ChatThread, AppNotification } from './types'
-import { persisted, session } from './session'
+import { persisted, memoryStore, session } from './session'
 
 export const PILLARS: {
   id: Pillar
@@ -108,7 +108,7 @@ const img = (id: string, w = 800, h = 600) =>
 
 import api from './axios'
 
-export const apiListings = persisted<Listing[]>('kv-api-listings', [])
+export const apiListings = memoryStore<Listing[]>([])
 let fetched = false
 export const fetchListings = async () => {
   if (fetched) return
@@ -123,7 +123,7 @@ export const fetchListings = async () => {
   }
 }
 
-export const chatThreads = persisted<ChatThread[]>('kv-chat-threads', [])
+export const chatThreads = memoryStore<ChatThread[]>([])
 
 let fetchedThreads = false
 export const fetchThreads = async () => {
@@ -156,7 +156,7 @@ export const fetchThreads = async () => {
   }
 }
 
-export const notifications = persisted<AppNotification[]>('kv-notifications', [])
+export const notifications = memoryStore<AppNotification[]>([])
 
 let fetchedNotifications = false
 export const fetchNotifications = async () => {
@@ -218,8 +218,8 @@ export function getPerson(id: string): Person {
   if (id === CURRENT_USER.id) return CURRENT_USER
   return { id, name: 'Kampiva User', initials: 'K', verified: true }
 }
-/** Listings a provider published from inside the app. Persisted so they survive a refresh. */
-export const userListings = persisted<Listing[]>('kv-user-listings-api', []) // Use a new key to ignore old local db
+/** Listings a provider published from inside the app. */
+export const userListings = memoryStore<Listing[]>([])
 
 let fetchedMine = false
 export const fetchMyListings = async () => {
