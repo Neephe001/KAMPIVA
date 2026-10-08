@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an Axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/v1` : 'http://localhost:5000/api/v1',
+  baseURL: import.meta.env.DEV ? 'http://localhost:5000/api/v1' : 'https://kampiva-backend.onrender.com/api/v1',
   withCredentials: true, // Important: Allows sending/receiving HTTP-Only cookies
 });
 

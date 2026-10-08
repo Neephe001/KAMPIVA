@@ -115,7 +115,9 @@ export const fetchListings = async () => {
   fetched = true
   try {
     const res = await api.get('/listings')
-    apiListings.set(res.data.listings)
+    if (res.data?.listings) {
+      apiListings.set(res.data.listings)
+    }
   } catch (err) {
     console.error('Failed to fetch listings', err)
   }
@@ -129,6 +131,7 @@ export const fetchThreads = async () => {
   fetchedThreads = true
   try {
     const res = await api.get('/chat')
+    if (!res.data?.threads) return;
     const threads = res.data.threads.map((t: any) => {
       const myId = CURRENT_USER.id // We might need to ensure CURRENT_USER has the actual ID, but for now we fallback
       // The API populates participants. Let's find the other person by email.
@@ -161,6 +164,7 @@ export const fetchNotifications = async () => {
   fetchedNotifications = true
   try {
     const res = await api.get('/notifications')
+    if (!res.data?.notifications) return;
     const notifs = res.data.notifications.map((n: any) => {
       // Calculate time string (e.g. "2h ago")
       const diffMs = Date.now() - new Date(n.createdAt).getTime();
@@ -223,7 +227,9 @@ export const fetchMyListings = async () => {
   fetchedMine = true
   try {
     const res = await api.get('/listings/me')
-    userListings.set(res.data.listings)
+    if (res.data?.listings) {
+      userListings.set(res.data.listings)
+    }
   } catch (err) {
     console.error('Failed to fetch my listings', err)
   }
