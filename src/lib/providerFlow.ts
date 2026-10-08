@@ -2,7 +2,7 @@ import type { Listing, Pillar } from './types'
 import type { Account } from './session'
 import { isValidMatric } from './session'
 
-export interface Equip { name: string; category: string; rate: string; unit: string; training: boolean; photo?: string | File }
+export interface Equip { name: string; category: string; rate: string; unit: string; training: boolean; photo?: string | File; mode: string }
 export interface RouteRow { from: string; to: string; time: string; fare: string; days: string[] }
 
 export interface FlowData {
@@ -49,7 +49,7 @@ export const blankFlow = (a: Account | null, fallbackName: string): FlowData => 
   who: '', name: a ? `${a.first} ${a.last}`.trim() : fallbackName, phone: a?.phone ?? '', matric: a?.matric ?? '', staffId: a?.staffId ?? '', idDoc: '',
   offerTypes: [], storeName: '', storeDesc: '', area: '', handover: ['Meet on campus'], itemTitle: '', itemCategory: '', itemPrice: '', itemCondition: 'Used, good', itemPhoto: '',
   institution: 'University of Ilorin', department: '', roleTitle: '', letter: '',
-  equipment: [{ name: '', category: '', rate: '', unit: 'per hour', training: false }],
+  equipment: [{ name: '', category: '', rate: '', unit: 'per hour', training: false, mode: 'rent' }],
   days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], from: '9:00 AM', to: '4:00 PM', maxBooking: '3 days', audience: ['Students'], approval: true, deposit: '',
   ownershipDoc: '', propTitle: '', propArea: '', address: '', propType: '', rent: '', rentPer: 'per year', rooms: '1', amenities: [], photos: '',
   inspDays: [], inspWindow: 'Morning', consent: false,
@@ -128,7 +128,7 @@ export function validate(sector: Pillar, step: StepId, d: FlowData): string | nu
       if (!d.letter) return 'Upload an authorisation letter or supervisor approval.'
       return null
     case 'equipment':
-      if (d.equipment.some((e) => !e.name.trim() || !e.category || !Number(digits(e.rate)))) return 'Give each item a name, category and rate.'
+      if (d.equipment.some((e) => !e.name.trim() || !e.category || (e.mode !== 'borrow' && !Number(digits(e.rate))))) return 'Give each item a name, category and rate.'
       return null
     case 'rules':
       if (!d.days.length) return 'Choose the days equipment is available.'
@@ -194,7 +194,7 @@ export function listingsFromFlow(sector: Pillar, d: FlowData, draft: boolean): L
     return [{ ...base, image: (typeof d.itemPhoto === 'string' && d.itemPhoto) ? d.itemPhoto : image, id: `u-${stamp}`, pillar: 'market', title: d.itemTitle.trim(), category: d.itemCategory, price: naira(d.itemPrice), condition: d.itemCondition, location: d.area || 'Main campus', description: d.storeDesc.trim(), tags: ['Verified seller', ...d.handover] }]
   if (sector === 'research')
     return d.equipment.map((e, i) => ({
-      ...base, image: (typeof e.photo === 'string' && e.photo) ? e.photo : image, id: `u-${stamp}-${i}`, pillar: 'research' as const, title: e.name.trim(), category: e.category, price: naira(e.rate), priceUnit: e.unit,
+      ...base, image: (typeof e.photo === 'string' && e.photo) ? e.photo : image, id: `u-${stamp}-${i}`, pillar: 'research' as const, title: e.name.trim(), category: e.category, price: e.mode === 'borrow' ? 0 : naira(e.rate), priceUnit: e.mode === 'borrow' ? 'borrow' : e.unit, priceLabel: e.mode === 'borrow' ? 'Free to borrow' : undefined,
       location: d.department.trim(), availability: 'Available, request access', description: `${e.name.trim()} from ${d.department.trim()}. Available ${d.days.join(', ')}, ${d.from} to ${d.to}. Max booking ${d.maxBooking}.`,
       tags: ['Institutional', ...(e.training ? ['Training required'] : []), ...(d.approval ? ['Approval needed'] : [])],
       spec: [{ label: 'Availability', value: `${d.days.join(', ')}, ${d.from} to ${d.to}` }, { label: 'Max booking', value: d.maxBooking }, { label: 'Who can book', value: d.audience.join(', ') }],

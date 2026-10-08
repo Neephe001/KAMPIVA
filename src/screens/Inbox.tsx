@@ -17,7 +17,7 @@ export function Inbox() {
   const [active, setActive] = useState(allThreads[0]?.id)
 
   const threads = allThreads.filter((t) => {
-    const hit = !q || `${t.personName} ${t.listingTitle ?? ''} ${t.lastMessage}`.toLowerCase().includes(q.toLowerCase())
+    const hit = !q || `${t.personName || 'Kampiva Member'} ${t.listingTitle ?? ''} ${t.lastMessage}`.toLowerCase().includes(q.toLowerCase())
     const inScope = scope === 'all' || (scope === 'unread' ? t.unread > 0 : t.pillar === scope)
     return hit && inScope
   })
@@ -53,7 +53,7 @@ export function Inbox() {
         {threads.map((t) => {
           const pillar = PILLARS.find((p) => p.id === t.pillar)!
           const selected = active === t.id
-          const initials = t.personName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'U'
+          const initials = (t.personName || 'Kampiva Member').split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'U'
           return (
             <button
               key={t.id}
@@ -67,7 +67,7 @@ export function Inbox() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <p className={`text-[14.5px] text-ink truncate ${t.unread ? 'font-bold' : 'font-semibold'}`}>{t.personName}</p>
+                  <p className={`text-[14.5px] text-ink truncate ${t.unread ? 'font-bold' : 'font-semibold'}`}>{t.personName || 'Kampiva Member'}</p>
                   <span className={`text-[11.5px] shrink-0 ${t.unread ? 'text-olive-700 font-semibold' : 'text-ink-400'}`}>{t.lastTime}</span>
                 </div>
                 <p className="text-[12px] font-medium mt-0.5 truncate" style={{ color: pillar.color }}>{pillar.name} · {t.listingTitle}</p>

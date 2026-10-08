@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { Pillar, Person, Listing, ChatThread, AppNotification } from './types'
 import { persisted, session } from './session'
 
@@ -54,6 +54,7 @@ function buildUser(): Person {
       rating: a.rating,
       providerPillars: [],
       memberSince: a.joinedAt ? new Date(a.joinedAt).toLocaleDateString([], { month: 'short', year: 'numeric' }) : 'Recently joined',
+      role: a.role,
     }
   }
   if (email) {
@@ -86,6 +87,7 @@ export const fetchMyProfile = async () => {
         reviewsCount: u.reviewsCount,
         avatarUrl: u.avatarUrl,
         joinedAt: u.createdAt,
+        role: u.role,
       } as any)
       // Force UI update by triggering session listeners
       session.signIn(u.email)
@@ -251,7 +253,19 @@ export const useListing = (id: string) => {
   useEffect(() => { fetchListings() }, [])
   const mine = userListings.use()
   const fetched = apiListings.use()
-  return mine.find((l) => l.id === id) || fetched.find((l) => l.id === id)
+  const [extra, setExtra] = useState<Listing | null>(null)
+  
+  const local = mine.find((l) => l.id === id) || fetched.find((l) => l.id === id)
+  
+  useEffect(() => {
+    if (!local && id) {
+      api.get(`/listings/${id}`)
+        .then(res => setExtra(res.data.listing))
+        .catch(console.error)
+    }
+  }, [id, local])
+  
+  return local || extra
 }
 export const useListingsByPillar = (p: Pillar) => {
   const all = useAllListings()

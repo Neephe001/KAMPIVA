@@ -427,7 +427,7 @@ export function OrderDetail({ id }: { id: string }) {
             subject: order.listingTitle,
             rating,
             body,
-            revieweeId: actor === 'buyer' ? order.sellerId : order.buyerId,
+            revieweeId: actor === 'buyer' ? order.providerId : order.buyerId,
             orderId: order.id,
           }).then(() => {
             markReviewed(id, actor)

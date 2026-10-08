@@ -245,3 +245,15 @@ export function AlertModal({ message, open, onClose, title = "Notice" }: { messa
     </Sheet>
   )
 }
+
+export function ConfirmModal({ message, open, onConfirm, onCancel, title = "Confirm", confirmText = "Confirm", cancelText = "Cancel", destructive = false }: { message: string; open: boolean; onConfirm: () => void; onCancel: () => void; title?: string; confirmText?: string; cancelText?: string; destructive?: boolean }) {
+  return (
+    <Sheet open={open} onClose={onCancel} title={title}>
+      <p className="text-[14.5px] leading-relaxed text-ink-700">{message}</p>
+      <div className="mt-6 grid grid-cols-2 gap-3">
+        <Button full variant="outline" onClick={onCancel}>{cancelText}</Button>
+        <Button full variant={destructive ? "soft" : "primary"} color={destructive ? "#c23b22" : undefined} onClick={() => { onConfirm(); onCancel() }}>{confirmText}</Button>
+      </div>
+    </Sheet>
+  )
+}

@@ -17,6 +17,7 @@ export type Screen =
   | { name: 'order'; id: string }         // §2.6 – order detail
   | { name: 'editListing'; id: string }
   | { name: 'adminQueue' }               // §4 – verification and report queues
+  | { name: 'adminDashboard' }           // Full admin dashboard
 
 export type Tab = 'home' | 'search' | 'inbox' | 'activity' | 'profile'
 

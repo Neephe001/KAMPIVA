@@ -34,7 +34,11 @@ export function ProviderOnboarding({ initial }: { initial?: Pillar }) {
   const error = sector && step ? validate(sector, step.id, data) : null
 
   // Scroll to top on every step change so the new step starts at its heading.
-  useEffect(() => { document.getElementById('prov-scroll')?.scrollTo({ top: 0 }) }, [i, sector, phase])
+  useEffect(() => { 
+    setTimeout(() => {
+      document.getElementById('prov-scroll')?.scrollTo({ top: 0, behavior: 'instant' })
+    }, 10)
+  }, [i, sector, phase])
 
   const choose = (p: Pillar) => { setPicked(p); setI(0); setShow(false) }
   const goBack = () => {
@@ -237,10 +241,10 @@ export function ProviderOnboarding({ initial }: { initial?: Pillar }) {
 /** Fixed header, scrolling body, pinned footer; centred and readable on desktop. */
 function Frame({ header, children, footer, progress }: { header: React.ReactNode; children: React.ReactNode; footer?: React.ReactNode; progress?: number }) {
   return (
-    <div className="absolute inset-0 flex flex-col bg-white">
+    <div className="flex h-full w-full flex-col bg-white">
       {header}
       {progress != null && <div className="h-1 shrink-0 bg-line"><div className="h-full bg-olive-700 transition-all duration-300" style={{ width: `${progress}%` }} /></div>}
-      <div id="prov-scroll" className="no-scrollbar min-h-0 flex-1 overflow-y-auto">
+      <div id="prov-scroll" className="flex-1 overflow-y-auto relative h-full">
         <div className="mx-auto w-full max-w-[600px]">{children}</div>
       </div>
       {footer && <div className="shrink-0 border-t border-line bg-white px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"><div className="mx-auto w-full max-w-[600px]">{footer}</div></div>}
@@ -323,15 +327,18 @@ function StepBody({ id, sector, d, set, show, goto }: { id: StepId; sector: Pill
       return (
         <Repeater<Equip>
           label="Equipment" addLabel="Add another item" items={d.equipment} setItems={(v) => set('equipment', v)}
-          blank={{ name: '', category: '', rate: '', unit: 'per hour', training: false }}
+          blank={{ name: '', category: '', rate: '', unit: 'per hour', training: false, mode: 'rent' }}
           render={(e, up) => (
             <>
               <TextField label="Name" value={e.name} onChange={(v) => up({ name: v })} placeholder="e.g. Benchtop centrifuge" />
               <SelectField label="Category" value={e.category} onChange={(v) => up({ category: v })} options={['Analytical Instruments', 'Sample Prep', 'Prototyping', 'Electronics', 'Other']} placeholder="Select category" />
-              <div className="grid grid-cols-2 gap-3">
-                <TextField label="Rate (₦)" inputMode="numeric" value={e.rate} onChange={(v) => up({ rate: v.replace(/[^\d,]/g, '') })} placeholder="1,500" />
-                <SelectField label="Charged" value={e.unit} onChange={(v) => up({ unit: v })} options={['per hour', 'per day', 'per use']} />
-              </div>
+              <Field label="Listing type"><Choice options={['Rent', 'Borrow']} value={e.mode === 'borrow' ? 'Borrow' : 'Rent'} onChange={(v) => up({ mode: v.toLowerCase() })} /></Field>
+              {e.mode !== 'borrow' && (
+                <div className="grid grid-cols-2 gap-3">
+                  <TextField label="Rate (₦)" inputMode="numeric" value={e.rate} onChange={(v) => up({ rate: v.replace(/[^\d,]/g, '') })} placeholder="1,500" />
+                  <SelectField label="Charged" value={e.unit} onChange={(v) => up({ unit: v })} options={['per hour', 'per day', 'per use']} />
+                </div>
+              )}
               <UploadField label="Equipment photo" accept="image/*" value={e.photo || ''} onChange={(v) => up({ photo: v })} />
               <Check2 checked={e.training} onChange={(v) => up({ training: v })}>First-time users need training</Check2>
             </>

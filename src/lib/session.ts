@@ -24,6 +24,7 @@ export interface Account {
   reviewsCount?: number
   avatarUrl?: string
   joinedAt?: string
+  role?: string
 }
 
 /** What the visitor was trying to do before being asked to sign in. */

@@ -4,6 +4,7 @@ import { BackHeader, StackScroll } from '../components/Chrome'
 import { Button, Field, inputClass, VerifiedBadge, AlertModal } from '../components/ui'
 import { Choice, SelectField, TextField, UploadField } from '../components/forms'
 import { MARKET_CATEGORIES, userListings, useListing } from '../lib/data'
+import { session, useUser } from '../lib/session'
 import { useNav } from '../lib/nav'
 import { sector as sectorInfo } from '../lib/providers'
 import { AREAS, WEEKDAYS } from '../lib/providerFlow'
@@ -13,6 +14,7 @@ const digits = (v: string | number) => Number(String(v).replace(/\D/g, ''))
 
 export function EditListing({ id }: { id: string }) {
   const { back } = useNav()
+  const account = session.account()
   const listing = useListing(id)
   const sector = listing?.pillar
 
@@ -23,7 +25,7 @@ export function EditListing({ id }: { id: string }) {
   const [f, setF] = useState({
     title: '', category: '', price: '', condition: 'Used, good', desc: '', place: '', photo: '' as string | File,
     unit: 'per hour', from: '', to: '', time: '07:30', seats: '3', days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] as string[],
-    propType: '', per: 'per year', area: '', amenities: [] as string[],
+    propType: '', per: 'per year', area: '', amenities: [] as string[], mode: 'rent'
   })
 
   // Populate state when listing loads
@@ -45,6 +47,7 @@ export function EditListing({ id }: { id: string }) {
         propType: listing.category || 'Self-contained',
         per: listing.priceUnit || 'per year',
         area: listing.location?.split(', ')?.[0] || '',
+        mode: listing.priceUnit === 'borrow' ? 'borrow' : 'rent',
       }))
     }
   }, [listing])
@@ -58,7 +61,7 @@ export function EditListing({ id }: { id: string }) {
   const info = sectorInfo(sector)
   const valid =
     sector === 'market' ? f.title.trim() && f.category && digits(f.price) && f.photo
-    : sector === 'research' ? f.title.trim() && f.category && digits(f.price) && f.photo
+    : sector === 'research' ? f.title.trim() && f.category && (f.mode === 'borrow' || digits(f.price)) && f.photo
     : sector === 'stay' ? f.title.trim() && f.propType && digits(f.price) && f.area && f.photo
     : f.title.trim() && f.to.trim() && digits(f.price) && f.days.length
 
@@ -82,11 +85,16 @@ export function EditListing({ id }: { id: string }) {
       let l: Listing
       
       if (sector === 'market') l = { ...base, title: f.title.trim(), category: f.category, price: digits(f.price), condition: f.condition, location: f.place || 'Main campus' }
-      else if (sector === 'research') l = { ...base, title: f.title.trim(), category: f.category, price: digits(f.price), priceUnit: f.unit, location: f.place || 'Campus lab', availability: 'Available, request access' }
+      else if (sector === 'research') l = { ...base, title: f.title.trim(), category: f.category, price: f.mode === 'borrow' ? 0 : digits(f.price), priceUnit: f.mode === 'borrow' ? 'borrow' : f.unit, priceLabel: f.mode === 'borrow' ? 'Free to borrow' : undefined, location: f.place || 'Campus lab', availability: 'Available, request access' }
       else if (sector === 'stay') l = { ...base, title: f.title.trim(), category: f.propType, price: digits(f.price), priceUnit: f.per, location: `${f.area}${f.place ? ', ' + f.place : ''}` }
       else l = { ...base, title: `${f.title.trim()} → ${f.to.trim()}`, priceLabel: `₦${digits(f.price).toLocaleString('en-NG')}`, location: `Departs ${f.time}`, availability: `${f.seats} seats open` }
       
-      await api.put(`/listings/${l.id}`, l)
+      if (account?.role === 'admin') {
+        const { adminUpdateListing } = await import('../lib/admin')
+        await adminUpdateListing(l.id, l)
+      } else {
+        await api.put(`/listings/${l.id}`, l)
+      }
       
       // Update local storage
       userListings.set((p) => p.map(item => item.id === l.id ? l : item))
@@ -141,10 +149,13 @@ export function EditListing({ id }: { id: string }) {
               <>
                 <TextField label="Equipment name" value={f.title} onChange={(v) => set('title', v)} placeholder="e.g. UV-Vis spectrophotometer" />
                 <SelectField label="Category" value={f.category} onChange={(v) => set('category', v)} options={['Analytical Instruments', 'Sample Prep', 'Prototyping', 'Electronics', 'Other']} placeholder="Select category" />
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField label="Rate (₦)" inputMode="numeric" value={f.price} onChange={(v) => set('price', v.replace(/[^\d,]/g, ''))} placeholder="1,500" />
-                  <SelectField label="Charged" value={f.unit} onChange={(v) => set('unit', v)} options={['per hour', 'per day', 'per use']} />
-                </div>
+                <Field label="Listing type"><Choice options={['Rent', 'Borrow']} value={f.mode === 'borrow' ? 'Borrow' : 'Rent'} onChange={(v) => set('mode', v.toLowerCase())} /></Field>
+                {f.mode !== 'borrow' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <TextField label="Rate (₦)" inputMode="numeric" value={f.price} onChange={(v) => set('price', v.replace(/[^\d,]/g, ''))} placeholder="1,500" />
+                    <SelectField label="Charged" value={f.unit} onChange={(v) => set('unit', v)} options={['per hour', 'per day', 'per use']} />
+                  </div>
+                )}
                 <TextField label="Lab or room" value={f.place} onChange={(v) => set('place', v)} placeholder="e.g. Central Lab, Room C-14" />
               </>
             )}

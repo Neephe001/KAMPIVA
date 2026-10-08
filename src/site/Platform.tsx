@@ -1,6 +1,6 @@
 import { Navigate, useLocation, useNavigate } from 'react-router'
 import { useEffect } from 'react'
-import { Plus, LogOut, ArrowLeft, Search, Bell, Heart, BadgeCheck, HandCoins, LayoutDashboard } from 'lucide-react'
+import { Plus, LogOut, ArrowLeft, Search, Bell, Heart, BadgeCheck, HandCoins, LayoutDashboard, ShieldCheck } from 'lucide-react'
 import { Avatar } from '../components/ui'
 import { CURRENT_USER, notifications, chatThreads, fetchMyProfile } from '../lib/data'
 import { BottomNav, TAB_LIST, useTabBadges } from '../components/Chrome'
@@ -25,6 +25,7 @@ import { Saved } from '../screens/Saved'
 import { Orders } from '../screens/Orders'
 import { OrderDetail } from '../screens/OrderDetail'
 import { AdminQueues } from '../screens/AdminQueues'
+import { AdminDashboard } from '../screens/AdminDashboard'
 import { useRef } from 'react'
 
 
@@ -64,6 +65,7 @@ function Shell() {
           {top.name === 'orders' && <Orders />}
           {top.name === 'order' && <OrderDetail id={top.id} />}
           {top.name === 'adminQueue' && <AdminQueues />}
+          {top.name === 'adminDashboard' && <AdminDashboard />}
           {top.name === 'editListing' && <EditListing id={top.id} />}
         </div>
         <BottomNav />
@@ -100,7 +102,7 @@ function Shell() {
 }
 
 const TITLES = { home: 'Home', search: 'Discover', inbox: 'Inbox', activity: 'Activity', profile: 'Profile' } as const
-const STACK_TITLES = { listing: 'Listing', seller: 'Provider', pillar: 'Explore', chat: 'Chat', create: 'New listing', provider: 'Become a provider', providerDashboard: 'Provider dashboard', reviews: 'Ratings & reviews', saved: 'Saved', orders: 'Orders', order: 'Order detail', adminQueue: 'Admin queues', editListing: 'Edit listing' } as const
+const STACK_TITLES = { listing: 'Listing', seller: 'Provider', pillar: 'Explore', chat: 'Chat', create: 'New listing', provider: 'Become a provider', providerDashboard: 'Provider dashboard', reviews: 'Ratings & reviews', saved: 'Saved', orders: 'Orders', order: 'Order detail', adminQueue: 'Admin queues', adminDashboard: 'Admin Dashboard', editListing: 'Edit listing' } as const
 
 function useLogout() {
   const navigate = useNavigate()
@@ -147,6 +149,17 @@ function Sidebar() {
           {isProvider ? <LayoutDashboard size={20} /> : <HandCoins size={20} />}
           <span className="hidden lg:block flex-1 text-left">{isProvider ? 'Provider dashboard' : 'Become a provider'}</span>
         </button>
+        {CURRENT_USER.role === 'admin' && (
+          <button
+            onClick={() => push({ name: 'adminDashboard' })}
+            title="Admin Dashboard"
+            aria-label="Admin Dashboard"
+            className={`${item} bg-amber-50 text-amber-800 hover:bg-amber-100`}
+          >
+            <ShieldCheck size={20} />
+            <span className="hidden lg:block flex-1 text-left">Admin Panel</span>
+          </button>
+        )}
       </nav>
       <div className="mt-auto space-y-1 text-[14px] text-ink-500">
         <div className="hidden lg:block mb-4 rounded-2xl bg-olive-950 p-4 text-white">

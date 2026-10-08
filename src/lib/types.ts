@@ -72,6 +72,7 @@ export interface Person {
   responseTime?: string
   memberSince?: string
   providerPillars?: Pillar[]
+  role?: string
 }
 
 export interface Review {
@@ -113,6 +114,7 @@ export interface Listing {
 export interface ChatThread {
   id: string
   personId: string
+  personName?: string
   pillar: Pillar
   listingId?: string
   listingTitle?: string

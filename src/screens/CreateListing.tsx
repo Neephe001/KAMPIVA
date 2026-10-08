@@ -21,7 +21,7 @@ export function CreateListing({ sector: initial }: { sector?: Pillar }) {
   const [f, setF] = useState({
     title: '', category: '', price: '', condition: 'Used, good', desc: '', place: '', photo: '' as string | File,
     unit: 'per hour', from: '', to: '', time: '07:30', seats: '3', days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] as string[],
-    propType: '', per: 'per year', area: '', amenities: [] as string[],
+    propType: '', per: 'per year', area: '', amenities: [] as string[], mode: 'rent'
   })
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((x) => ({ ...x, [k]: v }))
 
@@ -50,7 +50,7 @@ export function CreateListing({ sector: initial }: { sector?: Pillar }) {
   const info = sectorInfo(sector)
   const valid =
     sector === 'market' ? f.title.trim() && f.category && digits(f.price) && f.photo
-    : sector === 'research' ? f.title.trim() && f.category && digits(f.price) && f.photo
+    : sector === 'research' ? f.title.trim() && f.category && (f.mode === 'borrow' || digits(f.price)) && f.photo
     : sector === 'stay' ? f.title.trim() && f.propType && digits(f.price) && f.area && f.photo
     : f.from.trim() && f.to.trim() && digits(f.price) && f.days.length
 
@@ -74,7 +74,7 @@ export function CreateListing({ sector: initial }: { sector?: Pillar }) {
       const base = { id, pillar: sector, sellerId: 'u-me', postedAgo: 'Just now', image: finalImageUrl, description: f.desc.trim() || 'New listing from a verified Kampiva provider.', tags: ['Verified provider'] }
       let l: Listing
       if (sector === 'market') l = { ...base, title: f.title.trim(), category: f.category, price: digits(f.price), condition: f.condition, location: f.place || 'Main campus' }
-      else if (sector === 'research') l = { ...base, title: f.title.trim(), category: f.category, price: digits(f.price), priceUnit: f.unit, location: f.place || 'Campus lab', availability: 'Available, request access', tags: ['Institutional'] }
+      else if (sector === 'research') l = { ...base, title: f.title.trim(), category: f.category, price: f.mode === 'borrow' ? 0 : digits(f.price), priceUnit: f.mode === 'borrow' ? 'borrow' : f.unit, priceLabel: f.mode === 'borrow' ? 'Free to borrow' : undefined, location: f.place || 'Campus lab', availability: 'Available, request access', tags: ['Institutional'] }
       else if (sector === 'stay') l = { ...base, title: f.title.trim(), category: f.propType, price: digits(f.price), priceUnit: f.per, location: `${f.area}${f.place ? ', ' + f.place : ''}`, availability: 'Enquiry & viewing', tags: ['Verified landlord', ...f.amenities.slice(0, 2)] }
       else l = { ...base, title: `${f.from.trim()} → ${f.to.trim()}`, category: 'Daily commute', priceLabel: `₦${digits(f.price).toLocaleString('en-NG')}`, priceUnit: 'per seat', location: `Departs ${f.time}`, availability: `${f.seats} seats open`, spec: [{ label: 'Route', value: `${f.from.trim()} → ${f.to.trim()}` }, { label: 'Departs', value: `${f.time}, ${f.days.join(', ')}` }, { label: 'Seats', value: `${f.seats} available` }], tags: ['Verified driver', 'Recurring'] }
       
@@ -135,10 +135,13 @@ export function CreateListing({ sector: initial }: { sector?: Pillar }) {
               <>
                 <TextField label="Equipment name" value={f.title} onChange={(v) => set('title', v)} placeholder="e.g. UV-Vis spectrophotometer" />
                 <SelectField label="Category" value={f.category} onChange={(v) => set('category', v)} options={['Analytical Instruments', 'Sample Prep', 'Prototyping', 'Electronics', 'Other']} placeholder="Select category" />
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField label="Rate (₦)" inputMode="numeric" value={f.price} onChange={(v) => set('price', v.replace(/[^\d,]/g, ''))} placeholder="1,500" />
-                  <SelectField label="Charged" value={f.unit} onChange={(v) => set('unit', v)} options={['per hour', 'per day', 'per use']} />
-                </div>
+                <Field label="Listing type"><Choice options={['Rent', 'Borrow']} value={f.mode === 'borrow' ? 'Borrow' : 'Rent'} onChange={(v) => set('mode', v.toLowerCase())} /></Field>
+                {f.mode !== 'borrow' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <TextField label="Rate (₦)" inputMode="numeric" value={f.price} onChange={(v) => set('price', v.replace(/[^\d,]/g, ''))} placeholder="1,500" />
+                    <SelectField label="Charged" value={f.unit} onChange={(v) => set('unit', v)} options={['per hour', 'per day', 'per use']} />
+                  </div>
+                )}
                 <TextField label="Lab or room" value={f.place} onChange={(v) => set('place', v)} placeholder="e.g. Central Lab, Room C-14" />
               </>
             )}
