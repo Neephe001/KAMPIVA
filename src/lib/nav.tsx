@@ -51,12 +51,15 @@ interface NavState {
   becomeProvider: (sector?: Pillar) => void
   /** Pre-set Discover filters when arriving from the website. */
   preset: { pillar?: Pillar; q?: string }
+  menuOpen: boolean
+  setMenuOpen: (o: boolean) => void
 }
 
 const Ctx = createContext<NavState | null>(null)
 
 export function NavProvider({ children, launch }: { children: ReactNode; launch: Launch | null }) {
   const [tab, setTabState] = useState<Tab>(launch?.type === 'discover' ? 'search' : 'home')
+  const [menuOpen, setMenuOpen] = useState(false)
   const [stack, setStack] = useState<Screen[]>(
     launch?.type === 'provider'
       ? [{ name: 'provider', sector: launch.sector }]
@@ -90,7 +93,7 @@ export function NavProvider({ children, launch }: { children: ReactNode; launch:
   }, [isProvider])
 
   return (
-    <Ctx.Provider value={{ tab, stack, role, setTab, push, replace, back, reset, setRole, saved, toggleSaved, isSaved, sectors, isProvider, setSector, becomeProvider, preset }}>
+    <Ctx.Provider value={{ tab, stack, role, setTab, push, replace, back, reset, setRole, saved, toggleSaved, isSaved, sectors, isProvider, setSector, becomeProvider, preset, menuOpen, setMenuOpen }}>
       {children}
     </Ctx.Provider>
   )

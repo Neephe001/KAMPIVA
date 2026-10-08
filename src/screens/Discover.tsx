@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Search, X, SlidersHorizontal } from 'lucide-react'
+import { Search, X, SlidersHorizontal, Menu } from 'lucide-react'
 import { ScreenScroll } from '../components/Chrome'
 import { Button, Chip, Sheet, Toggle } from '../components/ui'
 import { ListingCard } from '../components/ListingCard'
@@ -10,7 +10,7 @@ import type { Pillar } from '../lib/types'
 type Scope = 'all' | Pillar
 
 export function Discover() {
-  const { preset } = useNav()
+  const { preset, setMenuOpen } = useNav()
   const LISTINGS = useAllListings()
   const [q, setQ] = useState(preset.q ?? '')
   const [scope, setScope] = useState<Scope>(preset.pillar ?? 'all')
@@ -45,7 +45,10 @@ export function Discover() {
     <ScreenScroll pad={false}>
       {/* sticky-ish search header */}
       <div className="px-4 md:px-8 pt-2 pb-2 bg-white">
-        <h1 className="font-display font-bold text-[22px] text-ink mb-3 md:hidden">Discover</h1>
+        <div className="flex items-center gap-2 mb-3 md:hidden">
+          <button onClick={() => setMenuOpen(true)} className="p-1.5 -ml-1.5 text-ink-700 active:bg-soft rounded-md transition"><Menu size={26} strokeWidth={2.2} /></button>
+          <h1 className="font-display font-bold text-[22px] text-ink">Discover</h1>
+        </div>
         <div className="relative">
           <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" />
           <input

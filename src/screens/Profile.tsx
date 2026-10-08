@@ -3,7 +3,7 @@ import {
   Bell, LogOut, Plus, ShoppingBag, FlaskConical, KeyRound, CarFront, Check, Flag,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { CalendarClock, MessageCircle, Pencil, QrCode } from 'lucide-react'
+import { CalendarClock, MessageCircle, Pencil, QrCode, Menu } from 'lucide-react'
 import { ScreenScroll } from '../components/Chrome'
 import { Avatar, Button, Field, Sheet, Toast, Toggle, VerifiedBadge, inputClass, useToast } from '../components/ui'
 import { CURRENT_USER, PILLARS, userListings, fetchMyListings } from '../lib/data'
@@ -27,7 +27,7 @@ const REQUESTS = [
 ]
 
 export function Profile() {
-  const { role, setRole, push, setTab, saved, sectors, isProvider, becomeProvider } = useNav()
+  const { role, setRole, push, setTab, saved, sectors, isProvider, becomeProvider, setMenuOpen } = useNav()
   const navigate = useNavigate()
   const providerMode = isProvider && role === 'provider'
   useEffect(() => { fetchMyListings() }, [])
@@ -85,7 +85,8 @@ export function Profile() {
 
   return (
     <ScreenScroll pad={false}>
-      <div className="px-4 md:px-8 pt-2 pb-3 md:hidden">
+      <div className="px-4 md:px-8 pt-2 pb-3 md:hidden flex items-center gap-2">
+        <button onClick={() => setMenuOpen(true)} className="p-1.5 -ml-1.5 text-ink-700 active:bg-soft rounded-md transition"><Menu size={26} strokeWidth={2.2} /></button>
         <h1 className="font-display font-bold text-[22px] text-ink">Profile</h1>
       </div>
 

@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
-import { ShieldCheck, MessageCircle, Star, Tag, Bell, CalendarClock, ChevronRight, CheckCheck, Info, ClipboardList } from 'lucide-react'
+import { ShieldCheck, MessageCircle, Star, Tag, Bell, CalendarClock, ChevronRight, CheckCheck, Info, ClipboardList, Menu } from 'lucide-react'
 import { ScreenScroll } from '../components/Chrome'
 import { Button, Sheet } from '../components/ui'
 import { notifications, fetchNotifications, markNotificationRead, markAllNotificationsRead, PILLARS } from '../lib/data'
 import { useNav, type Screen } from '../lib/nav'
 import type { AppNotification } from '../lib/types'
 import { ordersStore } from '../lib/orders'
-
 
 const ICON: Record<AppNotification['type'], typeof Bell> = {
   verify: ShieldCheck,
@@ -42,7 +41,7 @@ const GROUPS = [
 ]
 
 export function Activity() {
-  const { push } = useNav()
+  const { push, setMenuOpen } = useNav()
   
   // Use API-backed store
   const allList = notifications.use() || []
@@ -71,7 +70,10 @@ export function Activity() {
     <ScreenScroll pad={false}>
       <div className="px-4 md:px-8 pt-2 pb-3 flex items-end justify-between gap-3">
         <div>
-          <h1 className="font-display font-bold text-[22px] md:text-[28px] text-ink md:hidden">Activity</h1>
+          <div className="flex items-center gap-2 md:hidden">
+            <button onClick={() => setMenuOpen(true)} className="p-1.5 -ml-1.5 text-ink-700 active:bg-soft rounded-md transition"><Menu size={26} strokeWidth={2.2} /></button>
+            <h1 className="font-display font-bold text-[22px] md:text-[28px] text-ink">Activity</h1>
+          </div>
           <p className="text-[13px] text-ink-500">{unread > 0 ? `${unread} unread update${unread > 1 ? 's' : ''}` : 'You are all caught up'}</p>
         </div>
         <button

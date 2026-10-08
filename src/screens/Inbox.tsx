@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MessageCircle, Search, ShieldCheck } from 'lucide-react'
+import { MessageCircle, Search, ShieldCheck, Menu } from 'lucide-react'
 import { ScreenScroll } from '../components/Chrome'
 import { Avatar } from '../components/ui'
 import { chatThreads, fetchThreads, getPerson, PILLARS } from '../lib/data'
@@ -9,7 +9,7 @@ import { Chat } from './Chat'
 
 /** Inbox: single list on mobile, list plus open conversation side by side from lg up. */
 export function Inbox() {
-  const { push } = useNav()
+  const { push, setMenuOpen } = useNav()
   const [q, setQ] = useState('')
   const [scope, setScope] = useState<'all' | 'unread' | Pillar>('all')
   useEffect(() => { fetchThreads() }, [])
@@ -30,7 +30,10 @@ export function Inbox() {
   const list = (
     <>
       <div className="px-4 lg:px-5 pt-2 lg:pt-5 pb-3">
-        <h1 className="font-display font-bold text-[22px] text-ink md:hidden">Inbox</h1>
+        <div className="flex items-center gap-2 md:hidden">
+          <button onClick={() => setMenuOpen(true)} className="p-1.5 -ml-1.5 text-ink-700 active:bg-soft rounded-md transition"><Menu size={26} strokeWidth={2.2} /></button>
+          <h1 className="font-display font-bold text-[22px] text-ink">Inbox</h1>
+        </div>
         <p className="text-[13px] text-ink-500 mt-0.5">One conversation layer across every pillar.</p>
         <div className="relative mt-3">
           <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" />

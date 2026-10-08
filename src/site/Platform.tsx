@@ -210,6 +210,57 @@ function TopBar() {
   )
 }
 
+import { Sheet } from '../components/ui'
+
+function MobileMenu() {
+  const { menuOpen, setMenuOpen, setTab, push, isProvider, becomeProvider, role } = useNav()
+  const badge = useTabBadges()
+  const navigate = useNavigate()
+  const logout = useLogout()
+  const item = 'flex w-full items-center justify-start gap-3 rounded-xl px-3 py-3 text-[15px] font-medium transition active:scale-[0.98]'
+  
+  return (
+    <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title="Menu">
+      <div className="flex flex-col gap-1 mt-2">
+        {TAB_LIST.map(({ id, label, icon: Icon }) => {
+          const n = badge(id)
+          return (
+            <button
+              key={id}
+              onClick={() => { setTab(id); setMenuOpen(false) }}
+              className={`${item} text-ink-700 hover:bg-olive-50`}
+            >
+              <Icon size={20} strokeWidth={2} />
+              <span className="flex-1 text-left">{label}</span>
+              {n > 0 && <span className="min-w-4.5 rounded-full bg-alert px-1.5 text-center text-[11px] font-bold text-white">{n}</span>}
+            </button>
+          )
+        })}
+        <button
+          onClick={() => { (isProvider ? push({ name: 'providerDashboard' }) : becomeProvider()); setMenuOpen(false) }}
+          className={`${item} mt-2 border border-dashed border-olive-700/30 text-olive-800 hover:bg-olive-50`}
+        >
+          {isProvider ? <LayoutDashboard size={20} /> : <HandCoins size={20} />}
+          <span className="flex-1 text-left">{isProvider ? 'Provider dashboard' : 'Become a provider'}</span>
+        </button>
+        {CURRENT_USER.role === 'admin' && (
+          <button
+            onClick={() => { push({ name: 'adminDashboard' }); setMenuOpen(false) }}
+            className={`${item} mt-1 bg-amber-50 text-amber-800 hover:bg-amber-100`}
+          >
+            <ShieldCheck size={20} />
+            <span className="flex-1 text-left">Admin Panel</span>
+          </button>
+        )}
+      </div>
+      <div className="mt-8 space-y-1 border-t border-line pt-4">
+        <button onClick={() => navigate('/')} className={`${item} text-[14px] hover:bg-olive-50`}><ArrowLeft size={18} /> Back to site</button>
+        <button onClick={logout} className={`${item} text-[14px] text-alert hover:bg-alert-50`}><LogOut size={18} /> Log out</button>
+      </div>
+    </Sheet>
+  )
+}
+
 /** The Kampiva platform, opened after login. Icon rail on tablet, full sidebar on desktop, bottom tabs on mobile. */
 export function Platform() {
   const user = useUser()
@@ -230,6 +281,7 @@ export function Platform() {
             <Shell />
           </div>
         </div>
+        <MobileMenu />
       </div>
     </NavProvider>
   )

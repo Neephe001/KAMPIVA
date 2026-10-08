@@ -1,4 +1,4 @@
-import { Search, ChevronRight, ShoppingBag, FlaskConical, KeyRound, CarFront, ArrowRight, HandCoins, LayoutDashboard } from 'lucide-react'
+import { Search, ChevronRight, ShoppingBag, FlaskConical, KeyRound, CarFront, ArrowRight, HandCoins, LayoutDashboard, Menu } from 'lucide-react'
 import { KampivaMark } from '../site/shared'
 import { Avatar, VerifiedBadge, SectionHeader } from '../components/ui'
 import { ListingCard } from '../components/ListingCard'
@@ -15,7 +15,7 @@ const PILLAR_ICON: Record<Pillar, typeof ShoppingBag> = {
 }
 
 export function Home() {
-  const { push, setTab, isProvider, becomeProvider } = useNav()
+  const { push, setTab, isProvider, becomeProvider, setMenuOpen } = useNav()
   const all = useAllListings()
   const market = all.filter((l) => l.pillar === 'market')
   const nearby = all.filter((l) => l.pillar !== 'market').slice(0, 6)
@@ -24,6 +24,7 @@ export function Home() {
     <ScreenScroll pad={false}>
       {/* header */}
       <div className="md:hidden px-4 pt-2 pb-3 flex items-center gap-3">
+        <button onClick={() => setMenuOpen(true)} className="p-1.5 -ml-1.5 text-ink-700 active:bg-soft rounded-md transition"><Menu size={26} strokeWidth={2.2} /></button>
         <KampivaMark className="h-9" />
         <div className="flex-1 min-w-0">
           <p className="text-[12px] text-ink-500 leading-none">Welcome back,</p>
