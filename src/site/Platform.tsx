@@ -51,25 +51,22 @@ function Shell() {
   const top = stack[stack.length - 1]
   if (top) {
     return (
-      <>
-        <div key={stack.length} className="absolute inset-0 z-30 bg-white animate-slide md:mx-auto md:max-w-230 md:border-x md:border-line">
-          {top.name === 'listing' && <ListingDetail id={top.id} />}
-          {top.name === 'seller' && <SellerProfile id={top.id} />}
-          {top.name === 'pillar' && <PillarHub id={top.id} />}
-          {top.name === 'create' && <CreateListing sector={top.sector} />}
-          {top.name === 'provider' && <ProviderOnboarding initial={top.sector} />}
-          {top.name === 'chat' && <Chat id={top.id} listingId={top.listingId} />}
-          {top.name === 'providerDashboard' && <ProviderDashboard />}
-          {top.name === 'reviews' && <Reviews />}
-          {top.name === 'saved' && <Saved />}
-          {top.name === 'orders' && <Orders />}
-          {top.name === 'order' && <OrderDetail id={top.id} />}
-          {top.name === 'adminQueue' && <AdminQueues />}
-          {top.name === 'adminDashboard' && <AdminDashboard />}
-          {top.name === 'editListing' && <EditListing id={top.id} />}
-        </div>
-        <BottomNav />
-      </>
+      <div key={stack.length} className="absolute inset-0 z-30 bg-white animate-slide md:mx-auto md:max-w-230 md:border-x md:border-line">
+        {top.name === 'listing' && <ListingDetail id={top.id} />}
+        {top.name === 'seller' && <SellerProfile id={top.id} />}
+        {top.name === 'pillar' && <PillarHub id={top.id} />}
+        {top.name === 'create' && <CreateListing sector={top.sector} />}
+        {top.name === 'provider' && <ProviderOnboarding initial={top.sector} />}
+        {top.name === 'chat' && <Chat id={top.id} listingId={top.listingId} />}
+        {top.name === 'providerDashboard' && <ProviderDashboard />}
+        {top.name === 'reviews' && <Reviews />}
+        {top.name === 'saved' && <Saved />}
+        {top.name === 'orders' && <Orders />}
+        {top.name === 'order' && <OrderDetail id={top.id} />}
+        {top.name === 'adminQueue' && <AdminQueues />}
+        {top.name === 'adminDashboard' && <AdminDashboard />}
+        {top.name === 'editListing' && <EditListing id={top.id} />}
+      </div>
     )
   }
 
