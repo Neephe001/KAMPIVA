@@ -6,6 +6,17 @@ const api = axios.create({
   withCredentials: true, // Important: Allows sending/receiving HTTP-Only cookies
 });
 
+// Add a request interceptor to attach the JWT token
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('kv-token');
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 // Interceptor to handle 401 Unauthorized responses (e.g. token expired)
 api.interceptors.response.use(
   (response) => response,

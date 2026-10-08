@@ -74,6 +74,7 @@ export const session = {
   },
   signOut() {
     drop(K.user)
+    drop('kv-token')
     emit()
   },
   account: () => read<Account>(K.account),

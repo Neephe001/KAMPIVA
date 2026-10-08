@@ -185,6 +185,9 @@ export function Login({ go }: { go: Go }) {
 
   const handleLoginSuccess = async (res: any) => {
     try { sessionStorage.removeItem('kv-just-signed-up') } catch { /* ignore */ }
+    if (res.data.token) {
+      localStorage.setItem('kv-token', res.data.token);
+    }
     session.signIn(res.data.user.email)
     
     // Fetch provider status
